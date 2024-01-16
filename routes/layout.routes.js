@@ -48,7 +48,7 @@ router.post("/:venueId/create", async (req, res) => {
 
     return res.status(201).json({ success: true, venue: updatedVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -69,7 +69,7 @@ router.put("/:layoutId/edit", async (req, res) => {
 
     return res.status(201).json({ success: true, layout: updatedLayout });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -108,7 +108,7 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
 
     return res.status(201).json({ success: true, message: "Layout removed." });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -124,11 +124,11 @@ router.get("/:layoutId/find", async (req, res) => {
     }
     return res.status(201).json({ success: true, layout: findLayout });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
-// Get All Layouts from venue
+// Get All Layouts from one venue
 router.get('/:venueId/findAll', async (req,res) =>{
     const venueId = req.params.venueId;
     try {
@@ -140,7 +140,7 @@ router.get('/:venueId/findAll', async (req,res) =>{
         }
         return res.status(201).json({ success: true, layouts: findVenue.layouts })
     } catch (error) {
-        res.status(400).json({ success: false, message: error });
+        res.status(400).json({ success: false, message: error.message });
     }
 })
 

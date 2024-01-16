@@ -10,6 +10,7 @@ var indexRouter = require("./routes/index.routes");
 var usersRouter = require("./routes/users.routes");
 var venueRouter = require("./routes/venue.routes");
 var layoutRouter = require("./routes/layout.routes");
+var blockRouter = require("./routes/block.routes");
 
 var app = express();
 
@@ -35,6 +36,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/venue", venueRouter);
 app.use("/layout", layoutRouter);
+app.use("/block", blockRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI)

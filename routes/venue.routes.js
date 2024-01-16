@@ -20,7 +20,7 @@ router.post("/create", async (req, res) => {
 
     return res.status(201).json({ success: true, venue: newVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -41,7 +41,7 @@ router.put("/:venueId/edit", async (req, res) => {
 
     return res.status(201).json({ success: true, venue: updatedVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -62,7 +62,7 @@ router.delete("/:venueId/delete", async (req, res) => {
 
     res.status(201).json({ success: true, venue: deleteVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -81,7 +81,7 @@ router.get("/:venueId/find", async (req, res) => {
 
     return res.status(201).json({ success: true, venue: findVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -99,7 +99,7 @@ router.get("/findAll", async (req, res) => {
   
       return res.status(201).json({ success: true, venue: findAllVenues });
     } catch (error) {
-      res.status(400).json({ success: false, message: error });
+      res.status(400).json({ success: false, message: error.message });
     }
   });
 

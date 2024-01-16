@@ -9,7 +9,7 @@ const layoutSchema = new Schema(
     height: Number,
     status: String,
     capacity: Number,
-    blocks: [{ type: Schema.Types.ObjectId, ref: "Block" }],
+    blocks: [{ type: Schema.Types.ObjectId, ref: "Blocks" }],
   },
   {
     timestamps: true,
