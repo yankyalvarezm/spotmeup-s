@@ -44,7 +44,7 @@ router.post("/:layoutId/create", async (req, res) => {
       });
     }
 
-    return res.status(201).json({ success: true, venue: updatedLayout });
+    return res.status(201).json({ success: true, layout: updatedLayout });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
