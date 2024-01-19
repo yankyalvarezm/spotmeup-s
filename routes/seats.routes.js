@@ -18,11 +18,12 @@ router.post("/:sectionId/automatic/create", async (req, res) => {
       const maxCol = section.maxCol;
       const rowLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
       const rowToNumber = (letter) => rowLabels.indexOf(letter);
-      const maxRowNum = rowToNumber(section.maxRow.toUpperCase());
+      const maxRow = section.maxRow.toUpperCase()
+      const maxRowNum = rowToNumber(maxRow);
       let createdSeats = [];
   
       for (let i = 0; i < maxRowNum; i++) {
-        for (let j = 1; j <= maxCol; j++) {
+        for (let j = 0; j <= maxCol; j++) {
           const seatRow = rowLabels[i];
   
           const seatExist = section.seats.some(seat => seat.row === seatRow && seat.column === j);
