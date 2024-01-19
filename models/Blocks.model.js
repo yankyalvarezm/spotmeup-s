@@ -10,6 +10,7 @@ const blockSchema = new Schema(
     status: String,
     capacity: Number,
     bprice: Number,
+    maxSection: Number,
     sections: [{ type: Schema.Types.ObjectId, ref: "Sections" }],
   },
   {

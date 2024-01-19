@@ -8,8 +8,8 @@ const seatSchema = new Schema(
     height: Number,
     status: String,
     cprice: Number,
-    row: Number,
-    column: String,
+    row: String,
+    column: Number,
   },
   {
     timestamps: true,

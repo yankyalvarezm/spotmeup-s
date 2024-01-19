@@ -87,7 +87,7 @@ router.delete("/:blockId/:sectionId/delete", async (req, res) => {
     if (!block.sections.includes(sectionId)) {
       return res
         .status(404)
-        .json({ success: false, message: "Section not found." });
+        .json({ success: false, message: "Section not found in Block." });
     }
 
     block.sections = block.sections.filter((id) => id.toString() !== sectionId);
@@ -116,7 +116,7 @@ router.get("/:sectionId/find", async (req, res) => {
       if (!findSection) {
         return res
           .status(404)
-          .json({ success: false, message: "Block not found." });
+          .json({ success: false, message: "Section not found." });
       }
       return res.status(201).json({ success: true, block: findSection });
     } catch (error) {

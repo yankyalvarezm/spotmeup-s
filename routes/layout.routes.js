@@ -33,9 +33,7 @@ router.post("/:venueId/create", async (req, res) => {
 
     const updatedVenue = await Venues.findByIdAndUpdate(
       venueId,
-      {
-        $addToSet: { layouts: newLayout._id },
-      },
+      { $addToSet: { layouts: newLayout._id } },
       { new: true }
     ).populate("layouts");
 
@@ -129,20 +127,20 @@ router.get("/:layoutId/find", async (req, res) => {
 });
 
 // Get All Layouts from one venue
-router.get('/:venueId/findAll', async (req,res) =>{
-    const venueId = req.params.venueId;
-    try {
-        const findVenue = await Venues.findById(venueId).populate("layouts")
-        if(!findVenue){
-            return res
-                    .status(404)
-                    .json({ success: false, message: "Venue not found." });
-        }
-        return res.status(201).json({ success: true, layouts: findVenue.layouts })
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+router.get("/:venueId/findAll", async (req, res) => {
+  const venueId = req.params.venueId;
+  try {
+    const findVenue = await Venues.findById(venueId).populate("layouts");
+    if (!findVenue) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Venue not found." });
     }
-})
+    return res.status(201).json({ success: true, layouts: findVenue.layouts });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 // router.get("/:layoutName/findbyname", async (req, res) => {
 //   const layoutName = req.params.layoutId;
