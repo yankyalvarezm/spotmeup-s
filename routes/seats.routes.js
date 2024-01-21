@@ -7,56 +7,58 @@ const Seats = require("../models/Seats.model");
 // Create & Assign - Automatic
 
 router.post("/:sectionId/automatic/create", async (req, res) => {
-    const sectionId = req.params.sectionId;
-  
-    try {
-      const section = await Sections.findById(sectionId).populate("seats");
-      if (!section) {
-        return res.status(404).json({ success: false, message: "Section not found" });
-      }
-  
-      const maxCol = section.maxCol;
-      const rowLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
-      const rowToNumber = (letter) => rowLabels.indexOf(letter);
-      const maxRow = section.maxRow.toUpperCase()
-      const maxRowNum = rowToNumber(maxRow);
-      let createdSeats = [];
-  
-      for (let i = 0; i < maxRowNum; i++) {
-        for (let j = 0; j <= maxCol; j++) {
-          const seatRow = rowLabels[i];
-  
-          const seatExist = section.seats.some(seat => seat.row === seatRow && seat.column === j);
-          if (!seatExist) {
-            const newSeat = new Seats({
-              x: 1,
-              y: 1,
-              width: 20,
-              height: 20,
-              status: "Available",
-              row: seatRow,
-              column: j
-            });
-            await newSeat.save();
-            createdSeats.push(newSeat);
-          }
+  console.log("Route hit - Line 10");
+  const sectionId = req.params.sectionId;
+
+  try {
+    const section = await Sections.findById(sectionId).populate("seats");
+    if (!section) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Section not found" });
+    }
+
+    const maxCol = section.maxCol;
+    const rowLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const rowToNumber = (letter) => rowLabels.indexOf(letter);
+    const maxRow = section.maxRow.toUpperCase();
+    const maxRowNum = rowToNumber(maxRow) + 1;
+    let createdSeats = [];
+
+    for (let i = 0; i < maxRowNum; i++) {
+      for (let j = 1; j <= maxCol; j++) {
+        const seatRow = rowLabels[i];
+
+        const seatExist = section.seats.some(
+          (seat) => seat.row === seatRow && seat.column === j
+        );
+        if (!seatExist) {
+          const newSeat = new Seats({
+            x: 1,
+            y: 1,
+            width: 20,
+            height: 20,
+            status: "Available",
+            row: seatRow,
+            column: j,
+          });
+          await newSeat.save();
+          createdSeats.push(newSeat);
         }
       }
-  
-      if (createdSeats.length > 0) {
-        section.seats.push(...createdSeats.map(seat => seat._id));
-        await section.save();
-      }
-      
-      return res.status(201).json({ success: true, newSeats: createdSeats });
-    } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
     }
-  });
-  
 
+    if (createdSeats.length > 0) {
+      section.seats.push(...createdSeats.map((seat) => seat._id));
+      await section.save();
+    }
 
-
+    return res.status(201).json({ success: true, newSeats: createdSeats });
+  } catch (error) {
+    console.log('Errorrr')
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 // Create & Assign - Manual
 
@@ -64,7 +66,7 @@ router.post("/:sectionId/manual/create", async (req, res) => {
   const sectionId = req.params.sectionId;
   const { row, column, ...seatData } = req.body;
 
-//   const rowToNumber = (letter) => letter.charCodeAt(0) - "A".charCodeAt(0);
+  //   const rowToNumber = (letter) => letter.charCodeAt(0) - "A".charCodeAt(0);
   const rowToNumber = (letter) => letter.charCodeAt(0) - "A".charCodeAt(0);
 
   try {
