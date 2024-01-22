@@ -5,7 +5,6 @@ const Sections = require("../models/Sections.model");
 const Seats = require("../models/Seats.model");
 
 // Create & Assign - Automatic
-
 router.post("/:sectionId/automatic/create", async (req, res) => {
   console.log("Route hit - Line 10");
   const sectionId = req.params.sectionId;
@@ -61,7 +60,6 @@ router.post("/:sectionId/automatic/create", async (req, res) => {
 });
 
 // Create & Assign - Manual
-
 router.post("/:sectionId/manual/create", async (req, res) => {
   const sectionId = req.params.sectionId;
   const { row, column, ...seatData } = req.body;
@@ -228,7 +226,6 @@ router.get("/:seatId/find", async (req, res) => {
 });
 
 // Get All Seats from one Section
-
 router.get("/:sectionId/findAll", async (req, res) => {
   const sectionId = req.params.sectionId;
 

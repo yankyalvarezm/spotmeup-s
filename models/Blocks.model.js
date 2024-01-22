@@ -8,10 +8,14 @@ const blockSchema = new Schema(
     width: Number,
     height: Number,
     status: String,
+    type: String,
     capacity: Number,
     bprice: Number,
     maxSection: Number,
+    maxTables: Number,
     sections: [{ type: Schema.Types.ObjectId, ref: "Sections" }],
+    tables: [{ type: Schema.Types.ObjectId, ref: "Tables" }],
+    
   },
   {
     timestamps: true,

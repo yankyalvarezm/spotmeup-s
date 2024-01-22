@@ -10,7 +10,7 @@ const tableSchema = new Schema(
     cprice: Number,
     tickets: Number,
     isIncluded: Boolean,
-    Number: Number,
+    number: Number,
   },
   {
     timestamps: true,
