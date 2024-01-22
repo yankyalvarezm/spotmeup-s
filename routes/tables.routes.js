@@ -101,11 +101,137 @@ router.post("/:blockId/manual/create", async (req, res) => {
 });
 
 // Edit
+router.put("/:blockId/:tableId/edit", async (req, res) => {
+  const { blockId, tableId } = req.params;
+
+  const { number, ...tableData } = req.body;
+
+  try {
+    const block = await Blocks.findById(blockId).populate("tables");
+    if (!block) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Block not found" });
+    }
+
+    const tableToUpdate = await Tables.findById(tableId);
+    if (!tableToUpdate) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Table not found" });
+    }
+
+    if (number !== tableToUpdate.number) {
+      const tableExist = block.tables.some((table) => table.number === number);
+      console.log("Line 128 - Table Exist:", tableExist);
+
+      if (tableExist) {
+        return res.status(404).json({
+          success: false,
+          message: "Table number taken.",
+        });
+      }
+    }
+
+    const updatedTable = await Tables.findByIdAndUpdate(tableId, {
+      number,
+      ...tableData,
+    });
+
+    if (!updatedTable) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Table not updated." });
+    }
+
+    return res.status(201).json({ success: true, table: updatedTable });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 // Delete & Unassign
+router.delete("/:blockId/:tableId/delete", async (req, res) => {
+  const blockId = req.params.blockId;
+  const tableId = req.params.tableId;
+
+  try {
+    const block = await Blocks.findById(blockId);
+    if (!block) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Block not found." });
+    }
+
+    if (!block.tables.includes(tableId)) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Table not found in Block." });
+    }
+
+    block.tables = block.tables.filter((id) => id.toHexString() !== tableId);
+    await block.save();
+
+    const table = await Tables.findById(tableId);
+
+    if (!table) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seats not found." });
+    }
+
+    await Tables.findByIdAndDelete(tableId);
+
+    return res.status(201).json({ success: true, message: "Table removed." });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 // Get One
+router.get("/:tableId/find", async (req, res) => {
+  const tableId = req.params.tableId;
 
-// Get All Seats from one Block
+    try {
+        const findTable = await Tables.findById(tableId)
+
+
+        if(!findTable){
+            return res
+        .status(404)
+        .json({ success: false, message: "Table not found." });
+        }
+
+        return res.status(201).json({ success: true, block: findTable });
+
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+
+});
+
+// Get All tables from one Block
+router.get("/:blockId/findAll", async (req, res) => {
+    const blockId = req.params.blockId;
+  
+    try {
+      const findBlockTables = await Blocks.findById(blockId).populate(
+        "tables"
+      );
+      if (!findBlockTables) {
+        return res
+          .status(404)
+          .json({ success: false, message: "tables not found." });
+      }
+  
+      console.log("Found tables:", findBlockTables.tables);
+  
+      return res
+        .status(201)
+        .json({ success: true, tables: findBlockTables.tables });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
 
 module.exports = router;
