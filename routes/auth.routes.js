@@ -40,20 +40,20 @@ router.post('/signup', async (req,res) => {
         }
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
-        // const newUser = new Users({name, lastName, email, password: hashedPassword, telephone, address, nationalID})
-        // await newUser.save()
-        // const {_id} = newUser
-        // const payload  = {_id, name, lastName, email, telephone, address, nationalID}
+        const newUser = new Users({name, lastName, email, password: hashedPassword, telephone, address, nationalID})
+        await newUser.save()
+        const {_id} = newUser
+        const payload  = {_id, name, lastName, email, telephone, address, nationalID}
 
-        // // Create and sign the token
-        // const authToken = jwt.sign(payload, process.env.SECRET, {
-        //     algorithm: "HS256",
-        //     expiresIn: "6h",
-        //   });
+        // Create and sign the token
+        const authToken = jwt.sign(payload, process.env.SECRET, {
+            algorithm: "HS256",
+            expiresIn: "6h",
+          });
 
         // Send the token and new user as the response
-        // return res.status(200).json({ success:true, authToken });
-        return res.status(200).json({ success:true });
+        return res.status(200).json({ success:true, authToken });
+        // return res.status(200).json({ success:true });
 
     } catch (error) {
         res.status(500).json({ success:false, message: error.message });
@@ -63,15 +63,15 @@ router.post('/signup', async (req,res) => {
 //Login
 
 router.post('/login', async (req, res) => {
+    
     const {email, password} = req.body;
     if(email === '' || password === ''){
         res.status(400).json({ message: "Provide email and password." });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ success:false, message: "Provide a valid email address." });
+        return res.status(400).json({ success:false, message: "Provide a valid email address." });
     }
-
     try {
         const userExists = await Users.findOne({email})
         if(!userExists){
@@ -81,7 +81,7 @@ router.post('/login', async (req, res) => {
         if(!correctPassword){
             return res.status(401).json({success:false, message: "Incorrect Password!"})
         }
-        const {_id, name, lastname, email, password, telephone, address, nationalID} = userExists
+        const {_id, name, lastname, telephone, address, nationalID} = userExists
         const payload  = {_id, name, lastname, email, password, telephone, address, nationalID}
 
          // Create and sign the token
@@ -92,6 +92,7 @@ router.post('/login', async (req, res) => {
         return res.status(200).json({ success:true, authToken });
 
     } catch (error) {
+        // console.log(error);
         res.status(500).json({ success:false, message: error.message });
     }
 
