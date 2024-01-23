@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
+//Middleware
+const isAuthenticated = require("../middleware/isAuthenticated.js");
+
+//User Schema
 const Users = require('../models/Users.model.js');
 
 //Bcrypt for password encrypting.
@@ -97,5 +101,10 @@ router.post('/login', async (req, res) => {
     }
 
 })
+
+
+router.get("/verify", isAuthenticated, async (req, res) => {
+    res.status(200).json({ user: req.user, success: true });
+  });
 
 module.exports = router;
