@@ -133,7 +133,7 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (email === "" || password === "") {
     console.error("Error: All Fields Must Be Filled.")
-    res.status(400).json({ message: "All Fields Must Be Filled." });
+    return res.status(400).json({ message: "All Fields Must Be Filled." });
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
