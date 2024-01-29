@@ -148,7 +148,7 @@ router.post("/login", async (req, res) => {
       console.error("Error: A User With That Email Doesn't Exist.")
       return res.status(401).json({
         success: false,
-        message: "A User With That Email Doesn't Exist.",
+        message: "A User With That \nEmail Doesn't Exist.",
       });
     }
     const correctPassword = bcrypt.compareSync(password, userExists.password);
