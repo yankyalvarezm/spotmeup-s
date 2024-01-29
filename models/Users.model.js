@@ -4,11 +4,11 @@ const userSchema = new Schema(
   {
     name: {type: String, required: true, trim: true},
     lastName: {type: String, required: true, trim: true},
-    telephone: String,
     email: {type: String, unique: true, required: true, trim: true},
-    address: String,
-    nationalID: {type: String, unique: true},
-    password: String,
+    password: {type: String, required: true},
+    nationalID: {type: String, default:"", unique: true},
+    telephone: {type: String, default: ""},
+    address: {type: String, default: ""},
   },
   {
     timestamps: true,
