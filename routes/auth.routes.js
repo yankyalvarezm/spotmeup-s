@@ -101,7 +101,6 @@ router.post("/signup", async (req, res) => {
     // Send the token and new user as the response
     console.log("Success!")
     return res.status(200).json({ success: true, authToken, user: payload });
-    // return res.status(200).json({ success:true });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       console.error("\nMongoose Schema Validation Error on SignUp ==> ", error.message);
