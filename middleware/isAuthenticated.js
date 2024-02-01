@@ -4,7 +4,7 @@ const isAuthenticated = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token || token === "null") {
-    return res.status(400).json({ message: "Token not found" });
+    return res.status(404).json({ success: false, message: "Token not found." });
   }
  
   try {
@@ -12,8 +12,8 @@ const isAuthenticated = async (req, res, next) => {
     req.user = tokenInfo;
     next();
   } catch (error) {
-    console.log(error.message, "Error.message")
-    return res.status(401).json(error);
+    console.error("Caught Backend Error on isAuthenticated. Error Message: ",error.message)
+    return res.status(401).json({success: false, error});
   }
 };
 

@@ -9,6 +9,7 @@ const userSchema = new Schema(
     nationalID: {type: String, default:""},
     telephone: {type: String, default: ""},
     address: {type: String, default: ""},
+    userProfileImage: {type: String, default: "https://res.cloudinary.com/dg2rwod7i/image/upload/v1706746735/spotmeup/jitzxc68qehlcdyonwtw.png"}, 
   },
   {
     timestamps: true,

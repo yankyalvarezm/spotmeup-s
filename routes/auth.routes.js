@@ -32,14 +32,14 @@ router.post("/signup", async (req, res) => {
     password === "" ||
     !password
   ) {
-    consele.error("\nError: All Fields Must Be Filled.")
+    consele.error("\nError: All Fields Must Be Filled.");
     return res
       .status(400)
       .json({ success: false, message: "All Fields Must Be Filled." });
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
-    conseole.error("\nError: Provide A Valid Email Address.")
+    conseole.error("\nError: Provide A Valid Email Address.");
     return res
       .status(400)
       .json({ success: false, message: "Provide A Valid Email Address." });
@@ -55,13 +55,11 @@ router.post("/signup", async (req, res) => {
   try {
     const userExists = await Users.findOne({ email });
     if (userExists) {
-      console.error("\nError: Email Already In Use.")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Email Already In Use.",
-        });
+      console.error("\nError: Email Already In Use.");
+      return res.status(400).json({
+        success: false,
+        message: "Email Already In Use.",
+      });
     }
     const salt = bcrypt.genSaltSync(saltRounds);
     const hashedPassword = bcrypt.hashSync(password, salt);
@@ -99,25 +97,31 @@ router.post("/signup", async (req, res) => {
     });
 
     // Send the token and new user as the response
-    console.log("Success!")
-    return res.status(200).json({ success: true, authToken, user: payload });
+    console.log("Success!");
+    return res.status(201).json({ success: true, authToken, user: payload });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      console.error("\nMongoose Schema Validation Error on SignUp ==> ", error.message);
+      console.error(
+        "\nMongoose Schema Validation Error on SignUp ==> ",
+        error.message
+      );
       return res.status(400).json({
         success: false,
         error: `Caught Mongoose Validation Error Backend in SignUp. Error Message: ${error.message}`,
-        message: "All Fields Must Be Filled."
+        message: "All Fields Must Be Filled.",
       });
     } else if (error.code === 11000) {
-      console.error("\nMongoose Schema Duplicate Error on SignUp: Email already exists ====> ", error.message);
-      return res.status(401).json({
+      console.error(
+        "\nMongoose Schema Duplicate Error on SignUp: Email already exists ====> ",
+        error.message
+      );
+      return res.status(403).json({
         success: false,
         error: `Caught Mongoose Duplicate Key Error on Backend in SignUp. Error Message: ${error.message}`,
         message: "Email Already In Use.",
       });
     } else {
-      console.error("\nCaught Backend Error on SignUp ===> ", error.message)
+      console.error("\nCaught Backend Error on SignUp ===> ", error.message);
       return res.status(500).json({
         success: false,
         error: `Caught Backend Error on SignUp. Error Message: ${error.message}`,
@@ -132,12 +136,12 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (email === "" || password === "") {
-    console.error("Error: All Fields Must Be Filled.")
+    console.error("Error: All Fields Must Be Filled.");
     return res.status(400).json({ message: "All Fields Must Be Filled." });
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
-    console.error("Error: Provide A Valid Email Address.")
+    console.error("Error: Provide A Valid Email Address.");
     return res
       .status(400)
       .json({ success: false, message: "Provide A Valid Email Address." });
@@ -145,15 +149,15 @@ router.post("/login", async (req, res) => {
   try {
     const userExists = await Users.findOne({ email });
     if (!userExists) {
-      console.error("Error: A User With That Email Doesn't Exist.")
-      return res.status(401).json({
+      console.error("Error: A User With That Email Doesn't Exist.");
+      return res.status(404).json({
         success: false,
-        message: "User Not Found.",
+        message: "User Not Found!",
       });
     }
     const correctPassword = bcrypt.compareSync(password, userExists.password);
     if (!correctPassword) {
-      console.error("Error: Incorrect Password!")
+      console.error("Error: Incorrect Password!");
       return res
         .status(401)
         .json({ success: false, message: "Incorrect Password!" });
@@ -174,17 +178,15 @@ router.post("/login", async (req, res) => {
       algorithm: "HS256",
       expiresIn: "6h",
     });
-    console.log("Success!")
+    console.log("Success!");
     return res.status(200).json({ success: true, authToken, user: payload });
   } catch (error) {
-    console.error("\nCaught Backend Error on SignUp. Error Message ==> ",error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: `Caught Backend Error on SignUp. Error Message: ${error.message}`,
-        message: "Internal Server Error",
-      });
+    console.error("\nCaught Backend Error on SignUp. Error Message: ", error);
+    res.status(500).json({
+      success: false,
+      error: `Caught Backend Error on SignUp. Error Message: ${error.message}`,
+      message: "Internal Server Error",
+    });
   }
 });
 
