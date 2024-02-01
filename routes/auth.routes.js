@@ -14,6 +14,18 @@ const saltRounds = 10;
 //JWT for creating tokens for users
 const jwt = require("jsonwebtoken");
 const { default: mongoose } = require("mongoose");
+const keyPairEncryption = require("../configs/keyPairEncryption.js");
+
+router.get('/public-key', (req, res) => {
+  res.send(keyPairEncryption.getPublicKey());
+});
+
+// router.post('/decrypt-data', (req, res) => {
+//   const encryptedData = req.body.encryptedData;
+//   const decryptedData = keyPairEncryption.getPrivateKeyObj().decrypt(encryptedData)
+//   res.send(decryptedData);
+// });
+
 
 //Signup
 router.post("/signup", async (req, res) => {
@@ -78,7 +90,6 @@ router.post("/signup", async (req, res) => {
     //   address,
     //   nationalID,
     // });
-    await newUser.save();
     const { _id, nationalID, telephone, address } = newUser;
     const payload = {
       _id,
@@ -89,16 +100,16 @@ router.post("/signup", async (req, res) => {
       address,
       nationalID,
     };
-
+    
     // Create and sign the token
     const authToken = jwt.sign(payload, process.env.SECRET, {
       algorithm: "HS256",
       expiresIn: "6h",
     });
-
+    await newUser.save();
     // Send the token and new user as the response
     console.log("Success!");
-    return res.status(201).json({ success: true, authToken, user: payload });
+    return res.status(201).json({ success: true, authToken, user: payload});
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       console.error(

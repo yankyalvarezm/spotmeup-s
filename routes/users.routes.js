@@ -19,7 +19,7 @@ router.put("/edit", isAuthenticated, async (req, res) => {
     let invalidKey = null;
     for (let key in req.body) {
       if (key in foundUser) {
-        if (req.body[key] == foundUser[key]) {
+        if ((req.body[key] == foundUser[key]) || (req.body[key] == "")) {
           continue;
         } else {
           foundUser[key] = req.body[key];
