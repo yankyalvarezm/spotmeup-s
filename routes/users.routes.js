@@ -7,6 +7,7 @@ const { default: mongoose } = require("mongoose");
 
 router.put("/edit", isAuthenticated, async (req, res) => {
   let { _id } = req.user;
+  console.log("Debugging ===>", req.body);
   try {
     foundUser = await Users.findById(_id);
     if (!foundUser) {
@@ -64,7 +65,7 @@ router.put("/edit", isAuthenticated, async (req, res) => {
     console.log("Success!");
     return res.status(200).json({
       success: true,
-      message: "OK",
+      message: "User Updated Successfully!",
       authToken,
       user: payload,
     });
@@ -100,25 +101,27 @@ router.put("/edit", isAuthenticated, async (req, res) => {
   }
 });
 
-router.delete("/delete", isAuthenticated, async (req,res) => {
-  const {_id} = req.user;
+router.delete("/delete", isAuthenticated, async (req, res) => {
+  const { _id } = req.user;
   try {
-    const deleteUser = await Users.findByIdAndDelete(_id)
-    if(!deleteUser){
+    const deleteUser = await Users.findByIdAndDelete(_id);
+    if (!deleteUser) {
       console.error("Error: User Not Found!");
-      return res.status(404).json({success:false, message: "User Not Found!"});
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found!" });
     }
     console.log("Success!");
-    return res.status(200).json({success: true, message:"OK"})
+    return res.status(200).json({ success: true, message: "OK" });
   } catch (error) {
     console.error("\nCaught Backend Error on User Delete: ", error.message);
-      return res.status(500).json({
-        success: false,
-        error: `Caught Backend Error on User Delete. Error Message: ${error.message}`,
-        message: "Internal Server Error",
-      });
+    return res.status(500).json({
+      success: false,
+      error: `Caught Backend Error on User Delete. Error Message: ${error.message}`,
+      message: "Internal Server Error",
+    });
   }
-})
+});
 
 router.get("/:userId/find", async (req, res) => {
   const { userId } = req.params;
@@ -180,7 +183,6 @@ router.get("/findAll", async (req, res) => {
   }
 });
 
-
 //This Route is a delete route for admins. It will remain commented until admins are implemented.
 // router.delete("/:userId/delete", async (req,res) => {
 //   const {userId} = req.params;
@@ -201,6 +203,5 @@ router.get("/findAll", async (req, res) => {
 //       });
 //   }
 // })
-
 
 module.exports = router;
