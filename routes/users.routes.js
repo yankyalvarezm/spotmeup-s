@@ -3,6 +3,7 @@ var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/Users.model");
+const fileUploader = require("../configs/cloudinary.config");
 const { default: mongoose } = require("mongoose");
 
 router.put("/edit", isAuthenticated, async (req, res) => {
@@ -19,7 +20,7 @@ router.put("/edit", isAuthenticated, async (req, res) => {
     let invalidKey = null;
     for (let key in req.body) {
       if (key in foundUser) {
-        if ((req.body[key] == foundUser[key]) || (req.body[key] == "")) {
+        if (req.body[key] == foundUser[key] || req.body[key] == "") {
           continue;
         } else {
           foundUser[key] = req.body[key];
@@ -36,7 +37,6 @@ router.put("/edit", isAuthenticated, async (req, res) => {
         message: `User Details Failed To Be Updated!`,
       });
     }
-    await foundUser.save();
     const {
       name,
       lastname,
@@ -61,7 +61,11 @@ router.put("/edit", isAuthenticated, async (req, res) => {
       algorithm: "HS256",
       expiresIn: "6h",
     });
+
+    await foundUser.save();
+
     console.log("Success!");
+
     return res.status(200).json({
       success: true,
       message: "OK",
@@ -100,25 +104,102 @@ router.put("/edit", isAuthenticated, async (req, res) => {
   }
 });
 
-router.delete("/delete", isAuthenticated, async (req,res) => {
-  const {_id} = req.user;
+router.delete("/delete", isAuthenticated, async (req, res) => {
+  const { _id } = req.user;
   try {
-    const deleteUser = await Users.findByIdAndDelete(_id)
-    if(!deleteUser){
+    const deleteUser = await Users.findByIdAndDelete(_id);
+    if (!deleteUser) {
       console.error("Error: User Not Found!");
-      return res.status(404).json({success:false, message: "User Not Found!"});
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found!" });
     }
     console.log("Success!");
-    return res.status(200).json({success: true, message:"OK"})
+    return res.status(200).json({ success: true, message: "OK" });
   } catch (error) {
     console.error("\nCaught Backend Error on User Delete: ", error.message);
+    return res.status(500).json({
+      success: false,
+      error: `Caught Backend Error on User Delete. Error Message: ${error.message}`,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.post(
+  "/upload/image",
+  fileUploader.single("image"),
+  isAuthenticated,
+  async (req, res, next) => {
+    if (!req.file) {
+      // next(new Error("Image Failed To Upload!"));
+      console.error("Error: Image Failed To Upload!");
+      return res
+        .status(500)
+        .json({ success: true, message: "Image Failed To Upload!" });
+    }
+    const { _id } = req.user;
+
+    try {
+      const foundUser = Users.findById(_id);
+
+      if (!foundUser) {
+        console.error("Error: User Not Found!");
+        return res
+          .status(404)
+          .json({ success: false, message: "User Not Found!" });
+      }
+
+      foundUser.userProfileImage = req.file.path;
+
+      const {
+        name,
+        lastname,
+        email,
+        telephone,
+        address,
+        nationalID,
+        userProfileImage,
+      } = foundUser;
+
+      const payload = {
+        _id,
+        name,
+        lastname,
+        email,
+        telephone,
+        address,
+        nationalID,
+        userProfileImage,
+      };
+
+      const authToken = jwt.sign(payload, process.env.SECRET, {
+        algorithm: "HS256",
+        expiresIn: "6h",
+      });
+
+      await foundUser.save();
+
+      console.log("Success!");
+
+      return res
+        .status(201)
+        .json({ success: true, authToken, user: foundUser });
+    } catch (error) {
+
+      console.error(
+        "\nCaught Backend Error on User Upload Image: ",
+        error.message
+      );
+      
       return res.status(500).json({
         success: false,
-        error: `Caught Backend Error on User Delete. Error Message: ${error.message}`,
+        error: `Caught Backend Error on User Upload Image. Error Message: ${error.message}`,
         message: "Internal Server Error",
       });
+    }
   }
-})
+);
 
 router.get("/:userId/find", async (req, res) => {
   const { userId } = req.params;
@@ -180,7 +261,6 @@ router.get("/findAll", async (req, res) => {
   }
 });
 
-
 //This Route is a delete route for admins. It will remain commented until admins are implemented.
 // router.delete("/:userId/delete", async (req,res) => {
 //   const {userId} = req.params;
@@ -201,6 +281,5 @@ router.get("/findAll", async (req, res) => {
 //       });
 //   }
 // })
-
 
 module.exports = router;
