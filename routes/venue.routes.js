@@ -4,7 +4,7 @@ var router = express.Router();
 const Venues = require("../models/Venues.model");
 const { default: mongoose } = require("mongoose");
 
-// Create Venue
+// Create Venue changes were made
 router.post("/create", async (req, res) => {
   const { name, maxCapacity, address, contact } = req.body;
   if (!name || name === "" || !maxCapacity) {
