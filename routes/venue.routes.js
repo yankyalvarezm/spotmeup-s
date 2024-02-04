@@ -93,7 +93,8 @@ router.post("/create", async (req, res) => {
         message: "All Address Fields Required.",
       });
     }
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Backend in Venue Create. Error Message: ", error.message)
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -164,14 +165,16 @@ router.get("/findAll", async (req, res) => {
     const findAllVenues = await Venues.find();
 
     if (!findAllVenues) {
+      console.error("Error: Venue Not Found!")
       return res
         .status(404)
-        .json({ success: false, message: "Venue not found." });
+        .json({ success: false, message: "Venue Not Found." });
     }
 
-    return res.status(201).json({ success: true, venue: findAllVenues });
+    return res.status(201).json({ success: true, venues: findAllVenues });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Backend in Venue Find All. Error Message: ", error.message)
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
