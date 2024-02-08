@@ -18,6 +18,7 @@ const venueSchema = new Schema(
       city: {type: String, required:true},
       zip: {type: String, required:true},
     },
+    image: {type: String, trim:true, default:"https://res.cloudinary.com/dg2rwod7i/image/upload/v1707111848/spotmeup/hwsw7dy5a9odkx6gkbot.jpg"},
     layouts: [{ type: Schema.Types.ObjectId, ref: "Layouts" }],
   },
   {

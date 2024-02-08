@@ -93,7 +93,10 @@ router.post("/create", async (req, res) => {
         message: "All Address Fields Required.",
       });
     }
-    console.error("\nCaught Error Backend in Venue Create. Error Message: ", error.message)
+    console.error(
+      "\nCaught Error Backend in Venue Create. Error Message: ",
+      error.message
+    );
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
@@ -115,7 +118,22 @@ router.put("/:venueId/edit", async (req, res) => {
 
     return res.status(201).json({ success: true, venue: updatedVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    if (error instanceof mongoose.Error.ValidationError) {
+      console.error(
+        "\nMongoose Schema Validation Error on Venue Edit ==> ",
+        error.message
+      );
+      return res.status(400).json({
+        success: false,
+        error: `Caught Mongoose Validation Error Backend in Venue Edit. Error Message: ${error.message}`,
+        message: "All Address Fields Required.",
+      });
+    }
+    console.error(
+      "\nCaught Error Backend in Venue Edit. Error Message: ",
+      error.message
+    );
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -129,14 +147,16 @@ router.delete("/:venueId/delete", async (req, res) => {
     });
 
     if (!deleteVenue) {
+      console.error("\nError: Unable To Delete Venue.")
       return res
-        .status(404)
-        .json({ success: false, message: "Venue not found." });
+        .status(400)
+        .json({ success: false, message: "Failed To Delete Venue." });
     }
-
-    res.status(201).json({ success: true, venue: deleteVenue });
+    console.log("Success!")
+    res.status(201).json({ success: true, venue: deleteVenue, message: "Venue Deleted Successfully!" });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Backend in Venue Delete. Error Message: ", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -148,14 +168,17 @@ router.get("/:venueId/find", async (req, res) => {
     const findVenue = await Venues.findById(venueId);
 
     if (!findVenue) {
+      console.error("\nError: Venue Not Found.")
       return res
         .status(404)
-        .json({ success: false, message: "Venue not found." });
+        .json({ success: false, message: "Venue Not Found." });
     }
 
+    console.log("Success!");
     return res.status(201).json({ success: true, venue: findVenue });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Backend In Venue Find. Error Message: ", error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -165,15 +188,15 @@ router.get("/findAll", async (req, res) => {
     const findAllVenues = await Venues.find();
 
     if (!findAllVenues) {
-      console.error("Error: Venue Not Found!")
+      console.error("Error: No Venues Were Found!");
       return res
         .status(404)
-        .json({ success: false, message: "Venue Not Found." });
+        .json({ success: false, message: "No Venues Were Found." });
     }
-
+    console.log("Success!")
     return res.status(201).json({ success: true, venues: findAllVenues });
   } catch (error) {
-    console.error("\nCaught Error Backend in Venue Find All. Error Message: ", error.message)
+    console.error("\nCaught Error Backend in Venue Find All. Error Message: ", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
