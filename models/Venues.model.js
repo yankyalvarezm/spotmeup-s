@@ -6,7 +6,7 @@ const { Schema, model } = require("mongoose");
 const venueSchema = new Schema(
   {
     name: {type: String, trim:true},
-    descrtiption: {type: String, trim: true, default:"No Description"},
+    description: {type: String, trim: true, default:"No Description"},
     maxCapacity: Number,
     contact: {
       email: String,
