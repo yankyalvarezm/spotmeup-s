@@ -162,7 +162,7 @@ router.put("/:venueId/edit", async (req, res) => {
     }
     await updatedVenue.save();
     console.log("Success!")
-    return res.status(201).json({ success: true, venue: updatedVenue });
+    return res.status(201).json({ success: true, message: "Successfully Updated!",  venue: updatedVenue });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       console.error(
