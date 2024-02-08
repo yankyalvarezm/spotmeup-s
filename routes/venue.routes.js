@@ -6,13 +6,45 @@ const { default: mongoose } = require("mongoose");
 
 // Create Venue
 router.post("/create", async (req, res) => {
-  const { name, maxCapacity, address, contact } = req.body;
-  if (!name || name === "" || !maxCapacity) {
-    console.error("\nError: Name And MaxCapacity Must Be Filled!");
-    return res.status(400).json({
-      success: false,
-      message: "All Fields Must Be Filled!",
-    });
+  const { name, maxCapacity, address, contact, description } = req.body;
+  if (
+    !name ||
+    !maxCapacity ||
+    !address ||
+    !contact ||
+    !description
+  ) {
+    if (!name) {
+      console.error("\nError: Name Must Be Filled!");
+      return res.status(400).json({
+        success: false,
+        message: "Name Must Be Filled!",
+      });
+    } else if (!description) {
+      console.error(`\nError: Description Must Not Be Empty!`);
+      return res.status(400).json({
+        success: false,
+        message: `Description Must Not Be Null!`,
+      });
+    } else if (!maxCapacity) {
+      console.error(`\nError: Max Capacity Cannot Be ${maxCapacity}!`);
+      return res.status(400).json({
+        success: false,
+        message: `Max Capacity Cannot Be ${maxCapacity}!`,
+      });
+    } else if (!address) {
+      console.error(`\nError: Address Must Not Be Null!`);
+      return res.status(400).json({
+        success: false,
+        message: `Address Must Not Be Null!`,
+      });
+    } else if (!contact) {
+      console.error(`\nError: Contact Must Not Be Null!`);
+      return res.status(400).json({
+        success: false,
+        message: `Contact Must Not Be Null!`,
+      });
+    }
   }
   if (
     !("street" in address) ||
@@ -27,18 +59,14 @@ router.post("/create", async (req, res) => {
     });
   } else if (
     !address["street"] ||
-    address["street"] === "" ||
     !address["state"] ||
-    address["state"] === "" ||
     !address["city"] ||
-    address["city"] === "" ||
-    !address["zip"] ||
-    address["zip"] === ""
+    !address["zip"]
   ) {
     console.error("\nError: All Fields In Address Object! Must Be Filled!");
     return res.status(400).json({
       success: false,
-      message: "All Fields Must Be Filled!",
+      message: "All Fields In Address Must Be Filled!",
     });
   }
   if (
@@ -53,16 +81,13 @@ router.post("/create", async (req, res) => {
     });
   } else if (
     !contact["email"] ||
-    contact["email"] === "" ||
     !contact["owner"] ||
-    contact["owner"] === "" ||
-    !contact["telephone"] ||
-    contact["telephone"] === ""
+    !contact["telephone"]
   ) {
     console.error("\nError: All Fields In Contact Object Must Be Filled!");
     return res.status(400).json({
       success: false,
-      message: "All Fields Must Be Filled!",
+      message: "All Fields In Contact Must Be Filled!",
     });
   }
   try {
@@ -72,9 +97,10 @@ router.post("/create", async (req, res) => {
     });
 
     if (existingVenue) {
+      console.error("\nError: A Venue With The Same Name And Address Already Exists!")
       return res.status(400).json({
         success: false,
-        message: "A Venue With The Same Name And Address Already Exists.",
+        message: "A Venue With The Same Name And Address Already Exists!",
       });
     }
     const newVenue = new Venues({ name, maxCapacity, address, contact });
@@ -104,18 +130,38 @@ router.post("/create", async (req, res) => {
 // Edit Venue
 router.put("/:venueId/edit", async (req, res) => {
   const venueId = req.params.venueId;
-
+  
   try {
-    const updatedVenue = await Venues.findByIdAndUpdate(venueId, req.body, {
-      new: true,
-    });
+    const updatedVenue = await Venues.findById(venueId);
 
     if (!updatedVenue) {
+      console.error("\nError: Venue not found.")
       return res
         .status(404)
         .json({ success: false, message: "Venue not found." });
     }
-
+    let invalidKey = null;
+    for (let key in req.body) {
+      if (key in updatedVenue) {
+        if (req.body[key] == updatedVenue[key] || !req.body[key]) {
+          continue;
+        } else {
+          updatedVenue[key] = req.body[key];
+        }
+      } else {
+        invalidKey = key;
+        break;
+      }
+    }
+    if (invalidKey) {
+      console.error(`Error: Property ${invalidKey} not part of Venue Schema.`);
+      return res.status(500).json({
+        success: false,
+        message: `Venue Details Failed To Be Updated!`,
+      });
+    }
+    await updatedVenue.save();
+    console.log("Success!")
     return res.status(201).json({ success: true, venue: updatedVenue });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
@@ -143,19 +189,26 @@ router.delete("/:venueId/delete", async (req, res) => {
 
   try {
     const deleteVenue = await Venues.findByIdAndDelete(venueId, req.body, {
-      new: true,
+      new: true
     });
 
     if (!deleteVenue) {
-      console.error("\nError: Unable To Delete Venue.")
+      console.error("\nError: Unable To Delete Venue.");
       return res
         .status(400)
         .json({ success: false, message: "Failed To Delete Venue." });
     }
-    console.log("Success!")
-    res.status(201).json({ success: true, venue: deleteVenue, message: "Venue Deleted Successfully!" });
+    console.log("Success!");
+    res.status(201).json({
+      success: true,
+      venue: deleteVenue,
+      message: "Venue Deleted Successfully!",
+    });
   } catch (error) {
-    console.error("\nCaught Error Backend in Venue Delete. Error Message: ", error.message);
+    console.error(
+      "\nCaught Error Backend in Venue Delete. Error Message: ",
+      error.message
+    );
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
@@ -168,7 +221,7 @@ router.get("/:venueId/find", async (req, res) => {
     const findVenue = await Venues.findById(venueId);
 
     if (!findVenue) {
-      console.error("\nError: Venue Not Found.")
+      console.error("\nError: Venue Not Found.");
       return res
         .status(404)
         .json({ success: false, message: "Venue Not Found." });
@@ -177,7 +230,10 @@ router.get("/:venueId/find", async (req, res) => {
     console.log("Success!");
     return res.status(201).json({ success: true, venue: findVenue });
   } catch (error) {
-    console.error("\nCaught Error Backend In Venue Find. Error Message: ", error.message);
+    console.error(
+      "\nCaught Error Backend In Venue Find. Error Message: ",
+      error.message
+    );
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -193,10 +249,13 @@ router.get("/findAll", async (req, res) => {
         .status(404)
         .json({ success: false, message: "No Venues Were Found." });
     }
-    console.log("Success!")
+    console.log("Success!");
     return res.status(201).json({ success: true, venues: findAllVenues });
   } catch (error) {
-    console.error("\nCaught Error Backend in Venue Find All. Error Message: ", error.message);
+    console.error(
+      "\nCaught Error Backend in Venue Find All. Error Message: ",
+      error.message
+    );
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
