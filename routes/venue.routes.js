@@ -2,50 +2,49 @@ var express = require("express");
 var router = express.Router();
 
 const Venues = require("../models/Venues.model");
+const Layouts = require("../models/Layouts.model");
+const Blocks = require("../models/Blocks.model");
+const Sections = require("../models/Sections.model");
+const Tables = require("../models/Tables.model");
+const Seats = require("../models/Seats.model");
 const { default: mongoose } = require("mongoose");
 
 // Create Venue
 router.post("/create", async (req, res) => {
   const { name, maxCapacity, address, contact, description } = req.body;
-  if (
-    !name ||
-    !maxCapacity ||
-    !address ||
-    !contact ||
-    !description
-  ) {
-    if (!name) {
-      console.error("\nError: Name Must Be Filled!");
-      return res.status(400).json({
-        success: false,
-        message: "Name Must Be Filled!",
-      });
-    } else if (!description) {
-      console.error(`\nError: Description Must Not Be Empty!`);
-      return res.status(400).json({
-        success: false,
-        message: `Description Must Not Be Null!`,
-      });
-    } else if (!maxCapacity) {
-      console.error(`\nError: Max Capacity Cannot Be ${maxCapacity}!`);
-      return res.status(400).json({
-        success: false,
-        message: `Max Capacity Cannot Be ${maxCapacity}!`,
-      });
-    } else if (!address) {
-      console.error(`\nError: Address Must Not Be Null!`);
-      return res.status(400).json({
-        success: false,
-        message: `Address Must Not Be Null!`,
-      });
-    } else if (!contact) {
-      console.error(`\nError: Contact Must Not Be Null!`);
-      return res.status(400).json({
-        success: false,
-        message: `Contact Must Not Be Null!`,
-      });
-    }
+
+  if (!name) {
+    console.error("\nError: Name Must Be Filled!");
+    return res.status(400).json({
+      success: false,
+      message: "Name Must Be Filled!",
+    });
+  } else if (!description) {
+    console.error(`\nError: Description Must Not Be Empty!`);
+    return res.status(400).json({
+      success: false,
+      message: `Description Must Not Be Null!`,
+    });
+  } else if (!maxCapacity) {
+    console.error(`\nError: Max Capacity Cannot Be ${maxCapacity}!`);
+    return res.status(400).json({
+      success: false,
+      message: `Max Capacity Cannot Be ${maxCapacity}!`,
+    });
+  } else if (!address) {
+    console.error(`\nError: Address Must Not Be Null!`);
+    return res.status(400).json({
+      success: false,
+      message: `Address Must Not Be Null!`,
+    });
+  } else if (!contact) {
+    console.error(`\nError: Contact Must Not Be Null!`);
+    return res.status(400).json({
+      success: false,
+      message: `Contact Must Not Be Null!`,
+    });
   }
+
   if (
     !("street" in address) ||
     !("state" in address) ||
@@ -79,11 +78,7 @@ router.post("/create", async (req, res) => {
       success: false,
       message: "There Is Missing Property In Contact Object!",
     });
-  } else if (
-    !contact["email"] ||
-    !contact["owner"] ||
-    !contact["telephone"]
-  ) {
+  } else if (!contact["email"] || !contact["owner"] || !contact["telephone"]) {
     console.error("\nError: All Fields In Contact Object Must Be Filled!");
     return res.status(400).json({
       success: false,
@@ -97,7 +92,9 @@ router.post("/create", async (req, res) => {
     });
 
     if (existingVenue) {
-      console.error("\nError: A Venue With The Same Name And Address Already Exists!")
+      console.error(
+        "\nError: A Venue With The Same Name And Address Already Exists!"
+      );
       return res.status(400).json({
         success: false,
         message: "A Venue With The Same Name And Address Already Exists!",
@@ -130,12 +127,12 @@ router.post("/create", async (req, res) => {
 // Edit Venue
 router.put("/:venueId/edit", async (req, res) => {
   const venueId = req.params.venueId;
-  
+
   try {
     const updatedVenue = await Venues.findById(venueId);
 
     if (!updatedVenue) {
-      console.error("\nError: Venue not found.")
+      console.error("\nError: Venue not found.");
       return res
         .status(404)
         .json({ success: false, message: "Venue not found." });
@@ -161,8 +158,12 @@ router.put("/:venueId/edit", async (req, res) => {
       });
     }
     await updatedVenue.save();
-    console.log("Success!")
-    return res.status(201).json({ success: true, message: "Successfully Updated!",  venue: updatedVenue });
+    console.log("Success!");
+    return res.status(201).json({
+      success: true,
+      message: "Successfully Updated!",
+      venue: updatedVenue,
+    });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       console.error(
@@ -188,9 +189,7 @@ router.delete("/:venueId/delete", async (req, res) => {
   const venueId = req.params.venueId;
 
   try {
-    const deleteVenue = await Venues.findByIdAndDelete(venueId, req.body, {
-      new: true
-    });
+    const deleteVenue = await Venues.findById(venueId);
 
     if (!deleteVenue) {
       console.error("\nError: Unable To Delete Venue.");
@@ -198,6 +197,60 @@ router.delete("/:venueId/delete", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Failed To Delete Venue." });
     }
+    if (deleteVenue.layouts.length) {
+      const layouts = await Layouts.find({ _id: { $in: deleteVenue.layouts } });
+      if (!layouts) {
+        console.error("\nError: Unable To Delete Venue.");
+        return res
+          .status(400)
+          .json({ success: false, message: "Failed To Delete Venue." });
+      }
+      if (layouts.blocks.length) {
+        const blocks = await Blocks.find({ _id: { $in: layouts.blocks } });
+        if (!blocks) {
+          console.error("\nError: Unable To Delete Venue.");
+          return res
+            .status(400)
+            .json({ success: false, message: "Failed To Delete Venue." });
+        }
+        if (blocks.sections.length) {
+          const sections = await Sections.find({
+            _id: { $in: blocks.sections },
+          });
+          if (!sections) {
+            console.error("\nError: Unable To Delete Venue.");
+            return res
+              .status(400)
+              .json({ success: false, message: "Failed To Delete Venue." });
+          }
+          if (sections.seats.length) {
+            await Seats.deleteMany({ _id: { $in: sections.seats } }).then(() =>
+              console.log("Deleting Seats From Sections")
+            );
+          }
+          if (sections.tables.length) {
+            await Tables.deleteMany({ _id: { $in: sections.tables } }).then(() =>
+              console.log("Deleting Tables From Blocks")
+            );
+          }
+          await Sections.deleteMany({ _id: { $in: blocks.sections } }).then(() =>
+            console.log("Deleting Sections From Blocks")
+          );
+        }
+        if (blocks.tables.length) {
+          await Tables.deleteMany({ _id: { $in: blocks.tables } }).then(() =>
+            console.log("Deleting Tables From Blocks")
+          );
+        }
+        await Blocks.deleteMany({ _id: { $in: layouts.blocks } }).then(() =>
+          console.log("Deleting Blocks From Layouts")
+        );
+      }
+      await Layouts.deleteMany({ _id: { $in: this.layouts } }).then(() =>
+        console.log("Deleting Layouts From Venues")
+      );
+    }
+    await Venues.findByIdAndDelete(venueId);
     console.log("Success!");
     res.status(201).json({
       success: true,
@@ -226,7 +279,6 @@ router.get("/:venueId/find", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Venue Not Found." });
     }
-
     console.log("Success!");
     return res.status(201).json({ success: true, venue: findVenue });
   } catch (error) {
