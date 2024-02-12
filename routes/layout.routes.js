@@ -45,7 +45,7 @@ router.post("/:venueId/create", async (req, res) => {
     await findVenue.save();
 
     console.log("Success!");
-    return res.status(201).json({ success: true, layout: newLayout });
+    return res.status(201).json({ success: true, message: `Layout \"${newLayout.name}\" Created!`,layout: newLayout });
   } catch (error) {
     console.error(
       `\nCaught Error Backend in Venue Delete. Error Message: ${error.message}`
