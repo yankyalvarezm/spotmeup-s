@@ -1,4 +1,4 @@
-  var express = require("express");
+var express = require("express");
 var router = express.Router();
 
 const Layouts = require("../models/Layouts.model");
@@ -10,43 +10,49 @@ router.post("/:venueId/create", async (req, res) => {
   const layoutName = req.body.name;
 
   try {
-    const existingLayout = await Venues.findById(venueId).populate("layouts");
+    const findVenue = await Venues.findById(venueId);
 
-    if (!existingLayout) {
+    if (!findVenue) {
+      console.error("\nError: Venue Not Found!");
       return res
         .status(404)
-        .json({ success: false, message: "Layout doesn't exist" });
+        .json({ success: false, message: "Venue Not Found!" });
     }
+    if (findVenue.layouts.length) {
+      const findLayouts = await Layouts.find({
+        _id: { $in: findVenue.layouts },
+      });
 
-    const layoutExist = existingLayout.layouts.some(
-      (layout) => layout.name === layoutName
-    );
+      const layoutExist = findLayouts.some(
+        (layout) => layout.name === layoutName
+      );
 
-    if (layoutExist) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Layout name taken." });
+      if (layoutExist) {
+        console.error(
+          `\nError: A Layout With The Name \"${layoutName}\" Already Exists!`
+        );
+        return res
+          .status(400)
+          .json({ success: false, message: "Layout Name Taken!" });
+      }
     }
 
     const newLayout = new Layouts(req.body);
     await newLayout.save();
 
-    const updatedVenue = await Venues.findByIdAndUpdate(
-      venueId,
-      { $addToSet: { layouts: newLayout._id } },
-      { new: true }
-    ).populate("layouts");
+    findVenue.layouts.push(newLayout._id);
 
-    if (!updatedVenue) {
-      return res.status(404).json({
-        success: false,
-        message: "Venue not found or unable to update venue",
-      });
-    }
+    await findVenue.save();
 
-    return res.status(201).json({ success: true, venue: updatedVenue });
+    console.log("Success!");
+    return res.status(201).json({ success: true, layout: newLayout });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error(
+      `\nCaught Error Backend in Venue Delete. Error Message: ${error.message}`
+    );
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -138,9 +144,18 @@ router.get("/:venueId/findAll", async (req, res) => {
         .json({ success: false, message: "Venue not found." });
     }
     console.log("Success!");
-    return res.status(201).json({ success: true, message: `Layouts Found: ${findVenue.layouts.length}`, layouts: findVenue.layouts });
+    return res
+      .status(201)
+      .json({
+        success: true,
+        message: `Layouts Found: ${findVenue.layouts.length}`,
+        layouts: findVenue.layouts,
+      });
   } catch (error) {
-    console.error("\nCaught Error Backend in Layouts Find All. Error Message:", error.massage)
+    console.error(
+      "\nCaught Error Backend in Layouts Find All. Error Message:",
+      error.massage
+    );
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
