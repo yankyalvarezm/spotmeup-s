@@ -199,52 +199,60 @@ router.delete("/:venueId/delete", async (req, res) => {
     }
     if (deleteVenue.layouts.length) {
       const layouts = await Layouts.find({ _id: { $in: deleteVenue.layouts } });
-      if (!layouts) {
-        console.error("\nError: Unable To Delete Venue.");
+      if (!layouts || !layouts.length) {
+        console.error("\nError: Unable To Delete Layouts In Venue.");
         return res
-          .status(400)
-          .json({ success: false, message: "Failed To Delete Venue." });
+        .status(400)
+        .json({ success: false, message: "Failed To Delete Venue." });
       }
-      if (layouts.blocks.length) {
-        const blocks = await Blocks.find({ _id: { $in: layouts.blocks } });
-        if (!blocks) {
-          console.error("\nError: Unable To Delete Venue.");
-          return res
-            .status(400)
-            .json({ success: false, message: "Failed To Delete Venue." });
-        }
-        if (blocks.sections.length) {
-          const sections = await Sections.find({
-            _id: { $in: blocks.sections },
-          });
-          if (!sections) {
-            console.error("\nError: Unable To Delete Venue.");
+      // console.log(layouts);
+      for(let layout of layouts){
+        if (layout.blocks.length) {
+          const blocks = await Blocks.find({ _id: { $in: layout.blocks } });
+          if (!blocks || !blocks.length) {
+            console.error("\nError: Unable To Delete Blocks from Layout In Venue.");
             return res
               .status(400)
               .json({ success: false, message: "Failed To Delete Venue." });
           }
-          if (sections.seats.length) {
-            await Seats.deleteMany({ _id: { $in: sections.seats } }).then(() =>
-              console.log("Deleting Seats From Sections")
-            );
+          for(let block of blocks){
+
+            if (block.sections.length) {
+              const sections = await Sections.find({
+                _id: { $in: block.sections },
+              });
+              if (!sections || !sections.length) {
+                console.error("\nError: Unable To Delete Sections from Block from Layout In Venue.");
+                return res
+                  .status(400)
+                  .json({ success: false, message: "Failed To Delete Venue." });
+              }
+              for(let section of sections){
+                if (section.seats.length) {
+                  await Seats.deleteMany({ _id: { $in: sections.seats } }).then(() =>
+                    console.log("Deleting Seats From Sections")
+                  );
+                }
+                if (section.tables.length) {
+                  await Tables.deleteMany({ _id: { $in: sections.tables } }).then(() =>
+                    console.log("Deleting Tables From Blocks")
+                  );
+                }
+              }
+              await Sections.deleteMany({ _id: { $in: block.sections } }).then(() =>
+                console.log("Deleting Sections From Blocks")
+              );
+            }
+            if (block.tables.length) {
+              await Tables.deleteMany({ _id: { $in: block.tables } }).then(() =>
+                console.log("Deleting Tables From Blocks")
+              );
+            }
           }
-          if (sections.tables.length) {
-            await Tables.deleteMany({ _id: { $in: sections.tables } }).then(() =>
-              console.log("Deleting Tables From Blocks")
-            );
-          }
-          await Sections.deleteMany({ _id: { $in: blocks.sections } }).then(() =>
-            console.log("Deleting Sections From Blocks")
+          await Blocks.deleteMany({ _id: { $in: layouts.blocks } }).then(() =>
+            console.log("Deleting Blocks From Layouts")
           );
         }
-        if (blocks.tables.length) {
-          await Tables.deleteMany({ _id: { $in: blocks.tables } }).then(() =>
-            console.log("Deleting Tables From Blocks")
-          );
-        }
-        await Blocks.deleteMany({ _id: { $in: layouts.blocks } }).then(() =>
-          console.log("Deleting Blocks From Layouts")
-        );
       }
       await Layouts.deleteMany({ _id: { $in: this.layouts } }).then(() =>
         console.log("Deleting Layouts From Venues")
