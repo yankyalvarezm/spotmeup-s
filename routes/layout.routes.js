@@ -132,13 +132,16 @@ router.get("/:venueId/findAll", async (req, res) => {
   try {
     const findVenue = await Venues.findById(venueId).populate("layouts");
     if (!findVenue) {
+      console.error("Error: Venue Not Found!");
       return res
         .status(404)
         .json({ success: false, message: "Venue not found." });
     }
-    return res.status(201).json({ success: true, layouts: findVenue.layouts });
+    console.log("Success!");
+    return res.status(201).json({ success: true, message: `Layouts Found: ${findVenue.layouts.length}`, layouts: findVenue.layouts });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Backend in Layouts Find All. Error Message:", error.massage)
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
