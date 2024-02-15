@@ -88,7 +88,7 @@ router.put("/:layoutId/edit", async (req, res) => {
         if (req.body[key] == updatedLayout[key] || !req.body[key]) {
           continue;
         } else {
-          updatedVenue[key] = req.body[key];
+          updatedLayout[key] = req.body[key];
         }
       } else {
         invalidKey = key;
