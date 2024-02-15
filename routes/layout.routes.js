@@ -99,7 +99,7 @@ router.put("/:layoutId/edit", async (req, res) => {
       console.error(`Error: Property ${invalidKey} not part of Venue Schema.`);
       return res.status(500).json({
         success: false,
-        message: `Venue Details Failed To Be Updated!`,
+        message: `Layout Details Failed To Be Updated!`,
       });
     }
 
