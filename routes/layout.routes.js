@@ -6,14 +6,17 @@ const Venues = require("../models/Venues.model");
 const Blocks = require("../models/Blocks.model");
 const Sections = require("../models/Sections.model");
 const Tables = require("../models/Tables.model");
+const Seats = require("../models/Seats.model");
 
 // Create & Assign
 router.post("/:venueId/create", async (req, res) => {
   const venueId = req.params.venueId;
   const layoutName = req.body.name;
-  if(!layoutName){
-    console.error("\nError: Layout Must Have A Name!")
-    return res.status(400).json({success: false, message: "Layout Must Have A Name!"})
+  if (!layoutName) {
+    console.error("\nError: Layout Must Have A Name!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Layout Must Have A Name!" });
   }
   try {
     const findVenue = await Venues.findById(venueId);
@@ -139,7 +142,6 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Layout Not Found!" });
     }
-
     if (deleteLayout.blocks.length) {
       const blocks = await Blocks.find({ _id: { $in: deleteLayout.blocks } });
 
@@ -188,10 +190,9 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
           );
         }
       }
-      await Blocks.deleteMany({ _id: { $in: layouts.blocks } }).then(() =>
+      await Blocks.deleteMany({ _id: { $in: deleteLayout.blocks } }).then(() =>
         console.log("Deleting Blocks From Layouts")
       );
-
       removeLayoutFromVenue.layouts = removeLayoutFromVenue.layouts.filter(
         (id) => id != layoutId
       );
@@ -211,39 +212,6 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
     );
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
-
-  // console.log("Im deleting");
-
-  // try {
-  //   const venue = await Venues.findById(venueId);
-  //   if (!venue) {
-  //     return res
-  //       .status(404)
-  //       .json({ success: false, message: "Venue not found." });
-  //   }
-
-  //   if (!venue.layouts.includes(layoutId)) {
-  //     return res
-  //       .status(404)
-  //       .json({ success: false, message: "Layout not found." });
-  //   }
-
-  //   venue.layouts = venue.layouts.filter((id) => id.toString() !== layoutId);
-  //   await venue.save();
-
-  //   const layout = await Layouts.findById(layoutId);
-  //   if (!layout) {
-  //     return res
-  //       .status(404)
-  //       .json({ success: false, message: "Layout not found." });
-  //   }
-
-  //   await Layouts.findByIdAndDelete(layoutId);
-
-  //   return res.status(201).json({ success: true, message: "Layout removed." });
-  // } catch (error) {
-  //   res.status(400).json({ success: false, message: error.message });
-  // }
 });
 
 // Get One
@@ -252,15 +220,19 @@ router.get("/:layoutId/find", async (req, res) => {
   try {
     const findLayout = await Layouts.findById(layoutId);
     if (!findLayout) {
-
+      console.error("\nError: Layout Not Found!");
       return res
         .status(404)
-        .json({ success: false, message: "Layout not found." });
+        .json({ success: false, message: "Layout Not Found!" });
     }
-
+    console.log("Success!");
     return res.status(201).json({ success: true, layout: findLayout });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error(
+      "\nCaught Error Backend in Layout Find. Error Message: ",
+      error.message
+    );
+    res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
