@@ -11,7 +11,10 @@ const Tables = require("../models/Tables.model");
 router.post("/:venueId/create", async (req, res) => {
   const venueId = req.params.venueId;
   const layoutName = req.body.name;
-
+  if(!layoutName){
+    console.error("\nError: Layout Must Have A Name!")
+    return res.status(400).json({success: false, message: "Layout Must Have A Name!"})
+  }
   try {
     const findVenue = await Venues.findById(venueId);
 
@@ -249,7 +252,7 @@ router.get("/:layoutId/find", async (req, res) => {
   try {
     const findLayout = await Layouts.findById(layoutId);
     if (!findLayout) {
-      
+
       return res
         .status(404)
         .json({ success: false, message: "Layout not found." });
