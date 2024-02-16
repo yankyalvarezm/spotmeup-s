@@ -229,12 +229,12 @@ router.delete("/:venueId/delete", async (req, res) => {
               }
               for(let section of sections){
                 if (section.seats.length) {
-                  await Seats.deleteMany({ _id: { $in: sections.seats } }).then(() =>
+                  await Seats.deleteMany({ _id: { $in: section.seats } }).then(() =>
                     console.log("Deleting Seats From Sections")
                   );
                 }
                 if (section.tables.length) {
-                  await Tables.deleteMany({ _id: { $in: sections.tables } }).then(() =>
+                  await Tables.deleteMany({ _id: { $in: section.tables } }).then(() =>
                     console.log("Deleting Tables From Blocks")
                   );
                 }
@@ -249,12 +249,12 @@ router.delete("/:venueId/delete", async (req, res) => {
               );
             }
           }
-          await Blocks.deleteMany({ _id: { $in: layouts.blocks } }).then(() =>
+          await Blocks.deleteMany({ _id: { $in: layout.blocks } }).then(() =>
             console.log("Deleting Blocks From Layouts")
           );
         }
       }
-      await Layouts.deleteMany({ _id: { $in: this.layouts } }).then(() =>
+      await Layouts.deleteMany({ _id: { $in: deleteVenue.layouts } }).then(() =>
         console.log("Deleting Layouts From Venues")
       );
     }

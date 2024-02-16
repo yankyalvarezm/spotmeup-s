@@ -125,22 +125,22 @@ router.put("/:layoutId/edit", async (req, res) => {
 router.delete("/:venueId/:layoutId/delete", async (req, res) => {
   const venueId = req.params.venueId;
   const layoutId = req.params.layoutId;
-
+  
   try {
     const removeLayoutFromVenue = await Venues.findById(venueId);
     const deleteLayout = await Layouts.findById(layoutId);
     if (!removeLayoutFromVenue) {
       console.error("\nError: Venue Not Found!");
       return res
-        .status(400)
-        .json({ success: false, message: "Venue Not Found!" });
+      .status(400)
+      .json({ success: false, message: "Venue Not Found!" });
     }
-
+    
     if (!deleteLayout) {
       console.error("\nError: Layout Not Found!");
       return res
-        .status(400)
-        .json({ success: false, message: "Layout Not Found!" });
+      .status(400)
+      .json({ success: false, message: "Layout Not Found!" });
     }
     if (deleteLayout.blocks.length) {
       const blocks = await Blocks.find({ _id: { $in: deleteLayout.blocks } });
@@ -169,13 +169,13 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
 
           for (let section of sections) {
             if (section.seats.length) {
-              await Seats.deleteMany({ _id: { $in: sections.seats } }).then(
+              await Seats.deleteMany({ _id: { $in: section.seats } }).then(
                 () => console.log("Deleting Seats From Sections")
               );
             }
 
             if (section.tables.length) {
-              await Tables.deleteMany({ _id: { $in: sections.tables } }).then(
+              await Tables.deleteMany({ _id: { $in: section.tables } }).then(
                 () => console.log("Deleting Tables From Blocks")
               );
             }
@@ -193,24 +193,24 @@ router.delete("/:venueId/:layoutId/delete", async (req, res) => {
       await Blocks.deleteMany({ _id: { $in: deleteLayout.blocks } }).then(() =>
         console.log("Deleting Blocks From Layouts")
       );
-      removeLayoutFromVenue.layouts = removeLayoutFromVenue.layouts.filter(
-        (id) => id != layoutId
-      );
-      await removeLayoutFromVenue.save();
-      await Layouts.findByIdAndDelete(layoutId);
-      console.log("Success!");
-      res.status(201).json({
-        success: true,
-        venue: deleteLayout,
-        message: "Layout Deleted Successfully!",
-      });
     }
+    removeLayoutFromVenue.layouts = removeLayoutFromVenue.layouts.filter(
+      (id) => id != layoutId
+    );
+    await removeLayoutFromVenue.save();
+    await Layouts.findByIdAndDelete(layoutId);
+    console.log("Success!");
+    return res.status(201).json({
+      success: true,
+      venue: deleteLayout,
+      message: "Layout Deleted Successfully!",
+    });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Layout Delete. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 
