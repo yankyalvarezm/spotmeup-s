@@ -4,7 +4,7 @@ const layoutSchema = new Schema(
   {
     name: String,
     width: { type: Number, default: 800 },
-    maxWidth: {type: Number, default: 1500},
+    maxWidth: {type: Number, default: 500},
     height: { type: Number, default: 400 },
     maxHeight: {type: Number, default: 600},
     borderSize: { type: Number, default: 2 },
