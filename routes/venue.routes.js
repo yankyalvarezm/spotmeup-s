@@ -120,7 +120,9 @@ router.post("/create", async (req, res) => {
       "\nCaught Error Backend in Venue Create. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -180,7 +182,9 @@ router.put("/:venueId/edit", async (req, res) => {
       "\nCaught Error Backend in Venue Edit. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -202,45 +206,48 @@ router.delete("/:venueId/delete", async (req, res) => {
       if (!layouts || !layouts.length) {
         console.error("\nError: Unable To Delete Layouts In Venue.");
         return res
-        .status(400)
-        .json({ success: false, message: "Failed To Delete Venue." });
+          .status(400)
+          .json({ success: false, message: "Failed To Delete Venue." });
       }
       // console.log(layouts);
-      for(let layout of layouts){
+      for (let layout of layouts) {
         if (layout.blocks.length) {
           const blocks = await Blocks.find({ _id: { $in: layout.blocks } });
           if (!blocks || !blocks.length) {
-            console.error("\nError: Unable To Delete Blocks from Layout In Venue.");
+            console.error(
+              "\nError: Unable To Delete Blocks from Layout In Venue."
+            );
             return res
               .status(400)
               .json({ success: false, message: "Failed To Delete Venue." });
           }
-          for(let block of blocks){
-
+          for (let block of blocks) {
             if (block.sections.length) {
               const sections = await Sections.find({
                 _id: { $in: block.sections },
               });
               if (!sections || !sections.length) {
-                console.error("\nError: Unable To Delete Sections from Block from Layout In Venue.");
+                console.error(
+                  "\nError: Unable To Delete Sections from Block from Layout In Venue."
+                );
                 return res
                   .status(400)
                   .json({ success: false, message: "Failed To Delete Venue." });
               }
-              for(let section of sections){
+              for (let section of sections) {
                 if (section.seats.length) {
-                  await Seats.deleteMany({ _id: { $in: section.seats } }).then(() =>
-                    console.log("Deleting Seats From Sections")
+                  await Seats.deleteMany({ _id: { $in: section.seats } }).then(
+                    () => console.log("Deleting Seats From Sections")
                   );
                 }
                 if (section.tables.length) {
-                  await Tables.deleteMany({ _id: { $in: section.tables } }).then(() =>
-                    console.log("Deleting Tables From Blocks")
-                  );
+                  await Tables.deleteMany({
+                    _id: { $in: section.tables },
+                  }).then(() => console.log("Deleting Tables From Blocks"));
                 }
               }
-              await Sections.deleteMany({ _id: { $in: block.sections } }).then(() =>
-                console.log("Deleting Sections From Blocks")
+              await Sections.deleteMany({ _id: { $in: block.sections } }).then(
+                () => console.log("Deleting Sections From Blocks")
               );
             }
             if (block.tables.length) {
@@ -260,7 +267,7 @@ router.delete("/:venueId/delete", async (req, res) => {
     }
     await Venues.findByIdAndDelete(venueId);
     console.log("Success!");
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       venue: deleteVenue,
       message: "Venue Deleted Successfully!",
@@ -270,7 +277,9 @@ router.delete("/:venueId/delete", async (req, res) => {
       "\nCaught Error Backend in Venue Delete. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 
@@ -294,7 +303,7 @@ router.get("/:venueId/find", async (req, res) => {
       "\nCaught Error Backend In Venue Find. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -316,7 +325,9 @@ router.get("/findAll", async (req, res) => {
       "\nCaught Error Backend in Venue Find All. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 

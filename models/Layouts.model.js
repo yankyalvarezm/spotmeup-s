@@ -14,6 +14,7 @@ const layoutSchema = new Schema(
     status: String,
     capacity: Number,
     blocks: [{ type: Schema.Types.ObjectId, ref: "Blocks" }],
+    shapes: [{type: Schema.Types.ObjectId, ref: "Shapes"}]
   },
   {
     timestamps: true,

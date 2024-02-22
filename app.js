@@ -15,6 +15,7 @@ var sectionRouter = require("./routes/section.routes");
 var seatsRouter = require("./routes/seats.routes");
 var tablesRouter = require("./routes/tables.routes");
 var authRouter = require("./routes/auth.routes");
+var shapeRouter = require("./routes/shape.routes")
 var seed = require("./routes/seed.route");
 
 var app = express();
@@ -46,8 +47,8 @@ app.use("/section", sectionRouter);
 app.use("/seats", seatsRouter);
 app.use("/tables", tablesRouter);
 app.use("/auth", authRouter);
+app.use("/shape", shapeRouter);
 app.use("/seed", seed);
-
 mongoose
   .connect(process.env.MONGODB_URI)
   .then((x) => {
