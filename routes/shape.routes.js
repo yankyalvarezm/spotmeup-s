@@ -75,7 +75,7 @@ router.put("/:shapeId/edit", async (req, res) => {
     console.log("Success!");
     return res
       .status(200)
-      .json({ success: true, massage: "Shape Updated Successfully" });
+      .json({ success: true, massage: "Shape Updated Successfully", shape:editShape });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Shape Edit. Error Message: ",
