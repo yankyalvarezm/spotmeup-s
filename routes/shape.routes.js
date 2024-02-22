@@ -25,7 +25,7 @@ router.post("/:layoutId/create", async (req, res) => {
     console.log("Success!");
     return res
       .status(201)
-      .json({ success: true, message: `${newShape.shapeType} Created!` });
+      .json({ success: true, message: `${newShape.shapeType} Created!`, shape:newShape });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Shape Create. Error Message: ",
