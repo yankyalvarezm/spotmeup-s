@@ -12,6 +12,7 @@ const shapeModel = new Schema(
     borderRight: Number,
     borderTop: Number,
     borderBottom: Number,
+    borderColor: {type: String, default: "black"},
     borderSize: {type:Number, default: 1},
     color: {type: String, default: "white"},
     backgroundColor: {type: String, default: "black"},
