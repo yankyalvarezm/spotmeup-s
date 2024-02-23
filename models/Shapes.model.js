@@ -15,8 +15,8 @@ const shapeModel = new Schema(
     borderSize: {type:Number, default: 1},
     color: {type: String, default: "white"},
     backgroundColor: {type: String, default: "black"},
-    x: Number,
-    y: Number,
+    x: {type: Number, default:0},
+    y: {type: Number, default:0},
     layout: {type: Schema.Types.ObjectId, ref:"Layouts"}
   },
   {
