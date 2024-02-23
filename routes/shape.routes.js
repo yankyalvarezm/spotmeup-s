@@ -139,23 +139,22 @@ router.get("/:shapeId/find", async (req,res) => {
 router.get("/:layoutId/findAll", async (req,res) => {
   const {layoutId} = req.params;
   try {
-
-    const findLayout = await Layouts.findbyId(layoutId)
+    const findLayout = await Layouts.findById(layoutId)
     if(!findLayout){
       console.error("\nError: Layout Not Found!")
-      res.status(400).json({success: false, message: "Layout Not Found!"})
+      return res.status(400).json({success: false, message: "Layout Not Found!"})
     }
 
     const findShapes = await Shapes.find({_id:{$in: findLayout.shapes}})
     if(!findShapes || !findShapes.length){
       console.error("\nError: Shapes Not Found!")
-      res.status(400).json({success:true,message:"Shapes Not Found!"})
+      return res.status(400).json({success:false,message:"Shapes Not Found!"})
     }
     console.log("Success!")
     return res.status(200).json({success: true, shapes: findShapes})
   } catch (error) {
     console.error(
-      "\nCaught Error Backend in Shape Find. Error Message: ",
+      "\nCaught Error Backend in Shape FindAll. Error Message: ",
       error.message
     );
     return res
