@@ -57,7 +57,9 @@ router.put("/:shapeId/edit", async (req, res) => {
         ) {
           continue;
         } else {
+
           editShape[key] = req.body[key];
+          console.log(key, "Changed to: ", editShape[key])
         }
       } else {
         invalidKey = key;
@@ -89,7 +91,7 @@ router.put("/:shapeId/edit", async (req, res) => {
 
 
 router.delete('/:layoutId/:shapeId/delete', async (req, res) =>{
-  const {layoutId,findRemoveFromLayout} = req.params;
+  const {layoutId,shapeId} = req.params;
   try {
     const deleteShape = Shapes.findByIdAndDelete(shapeId);
     if(!deleteShape){
