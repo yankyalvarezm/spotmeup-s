@@ -39,6 +39,7 @@ router.post("/:layoutId/create", async (req, res) => {
 
 router.put("/:shapeId/edit", async (req, res) => {
   const { shapeId } = req.params;
+  console.log("BODY: ",req.body);
   try {
     const editShape = await Shapes.findById(shapeId);
     if (!editShape) {
