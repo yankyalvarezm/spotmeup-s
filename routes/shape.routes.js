@@ -53,15 +53,10 @@ router.put("/:shapeId/edit", async (req, res) => {
       if (key in editShape) {
         if (
           key === "shapeType" ||
-          req.body[key] == editShape[key] ||
-          !req.body[key]
+          req.body[key] == editShape[key]
         ) {
           continue;
-        } else if(req.body[key] === 0){
-          editShape[key] = req.body[key];
-          console.log(key, "Changed to: ", editShape[key])
-        }
-        else {
+        } else {
 
           editShape[key] = req.body[key];
           console.log(key, "Changed to: ", editShape[key])
