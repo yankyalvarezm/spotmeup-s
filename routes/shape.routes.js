@@ -55,6 +55,7 @@ router.put("/:shapeId/edit", async (req, res) => {
           key === "shapeType" ||
           req.body[key] == editShape[key]
         ) {
+          console.log("No Change: ", key ,"=>", req.body[key]);
           continue;
         } else {
 
