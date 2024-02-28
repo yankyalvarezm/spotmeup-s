@@ -171,14 +171,8 @@ router.put("/:shapeId/edit", async (req, res) => {
 router.delete("/:shapeId/delete", async (req, res) => {
   const { shapeId } = req.params;
   try {
-    const deleteShape = await Shapes.findByIdAndDelete(shapeId);
-    if (!deleteShape) {
-      console.error("\nError: Failed To Delete Shape!");
-      return res
-        .status(400)
-        .json({ success: false, message: "Failed To Delete Shape!" });
-    }
-    const removeFromLayout = await Layouts.findById(deleteShape.layout);
+    const findShape = await Shapes.findById(shapeId)
+    const removeFromLayout = await Layouts.findById(findShape.layout);
     if (!removeFromLayout) {
       console.error("\nError: Layout Not Found!");
       return res
@@ -188,11 +182,18 @@ router.delete("/:shapeId/delete", async (req, res) => {
     removeFromLayout.shapes = removeFromLayout.shapes.filter(
       (sId) => sId != shapeId
     );
+    const deleteShape = await Shapes.findByIdAndDelete(shapeId);
+    if (!deleteShape) {
+      console.error("\nError: Failed To Delete Shape!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Failed To Delete Shape!" });
+    }
     removeFromLayout.save();
     console.log("Success!");
     return res
       .status(200)
-      .json({ success: true, message: ` ${deleteShape.shapeType} Deleted!` });
+      .json({ success: true, message: ` ${findShape.shapeType} Deleted!` });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Shape Delete. Error Message: ",
