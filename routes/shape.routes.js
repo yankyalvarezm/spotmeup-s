@@ -172,6 +172,7 @@ router.delete("/:shapeId/delete", async (req, res) => {
   const { shapeId } = req.params;
   try {
     const findShape = await Shapes.findById(shapeId)
+    console.log(findShape);
     const removeFromLayout = await Layouts.findById(findShape.layout);
     if (!removeFromLayout) {
       console.error("\nError: Layout Not Found!");
@@ -211,7 +212,7 @@ router.get("/:shapeId/find", async (req, res) => {
     const findShape = await Shapes.findById(shapeId);
     if (!findShape) {
       console.error("\nError: Shape Not Found!");
-      res.status(400).json({ success: true, message: "Shape Not Found!" });
+      res.status(400).json({ success: false, message: "Shape Not Found!" });
     }
     console.log("Success!");
     return res.status(200).json({ success: true, shape: findShape });
@@ -238,10 +239,10 @@ router.get("/:layoutId/findAll", async (req, res) => {
 
     const findShapes = await Shapes.find({ _id: { $in: findLayout.shapes } });
     if (!findShapes || !findShapes.length) {
-      console.error("\nError: Shapes Not Found!");
+      console.log("\nSuccess: No Shapes Found!");
       return res
-        .status(400)
-        .json({ success: false, message: "Shapes Not Found!" });
+        .status(200)
+        .json({ success: true, message: "No Shapes Found!", shapes: findShapes });
     }
     console.log("Success!");
     return res.status(200).json({ success: true, shapes: findShapes });
