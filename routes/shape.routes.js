@@ -154,7 +154,7 @@ router.put("/:shapeId/edit", async (req, res) => {
       .status(200)
       .json({
         success: true,
-        massage: "Shape Updated Successfully",
+        message: "Shape Updated Successfully",
         shape: editShape,
       });
   } catch (error) {
