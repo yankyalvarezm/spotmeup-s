@@ -55,43 +55,9 @@ router.post("/:shapeId/duplicate", async (req, res) => {
       res.status(400).json({ success: false, message: "Layout Not Found!" });
     }
     const {
-      shapeType,
-      name,
-      width,
-      height,
-      border,
-      borderRadius,
-      borderLeft,
-      borderRight,
-      borderTop,
-      borderBottom,
-      borderColor,
-      borderSize,
-      color,
-      backgroundColor,
-      x,
-      y,
-      layout,
+      _id, createdAt,updatedAt,__v, ...copyShape
     } = findShape;
-    const newShape = new Shapes({
-      shapeType,
-      name,
-      width,
-      height,
-      border,
-      borderRadius,
-      borderLeft,
-      borderRight,
-      borderTop,
-      borderBottom,
-      borderColor,
-      borderSize,
-      color,
-      backgroundColor,
-      x,
-      y,
-      layout,
-    });
+    const newShape = new Shapes({copyShape});
 
     findLayout.shapes.push(newShape._id);
     await findLayout.save();
