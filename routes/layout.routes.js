@@ -308,50 +308,49 @@ router.get("/:layoutId/find", async (req, res) => {
     if(findLayout.blocks.length){
       findBlocks = await Blocks.find({_id:{$in: findLayout.blocks}})
     }
-    let findSections = []
+    let findSectionsFromBlocks = []
     let findTablesFromBlocks = []
     if(findBlocks.length){
       for(let block of findBlocks){
         if(block.sections.length){
-          findSections = await Sections.find({_id:{$in: block.sections}})
+          findSectionsFromBlocks = [...findSectionsFromBlocks, await Sections.find({_id:{$in: block.sections}})]
         }
         if(block.tables.length){
-          findTablesFromBlocks = await Tables.find({_id:{$in: block.tables}})
+          findTablesFromBlocks = [...findTablesFromBlocks, await Tables.find({_id:{$in: block.tables}})]
         }
       }
     }
     let seatsFromSections = []
     let tablesFromSections = []
-    if(findSections.length){
-      for(let section of findSections){
-        
-        if(section.seats.length){
-          seatsFromSections = await Seats.find({_id:{$in: section.seats}})
+    if(findSectionsFromBlocks.length){
+      for(let sections of findSectionsFromBlocks){
+        for(let section of sections){
+          if(section.seats.length){
+            seatsFromSections = [...seatsFromSections, await Seats.find({_id:{$in: section.seats}})]
+            // console.log(seatsFromSections);
+          }
+          if(section.tables.length){
+            tablesFromSections = [...tablesFromSections, await Tables.find({_id:{$in: section.tables}})]
+          }
         }
-        if(section.tables.length){
-          tablesFromSections = await Tables.find({_id:{$in: section.tables}})
         }
-      }
     }
-    const sections = [
-      ...findSections.map((section) => {
-        section.seats = seatsFromSections;
-        section.tables = tablesFromSections;
-        return section;
+    const sections = findSectionsFromBlocks.map((blockSection) => {
+      return blockSection.map((section,index) => {
+        return {...section._doc, seats: seatsFromSections[index], tables: tablesFromSections[index]};
       })
-    ];
-    const blocks = [
-      ...findBlocks.map((block) => {
-        block.tables = findTablesFromBlocks;
-        block.sections = sections
-        return block;
+    })
+    
+    const blocks = findBlocks.map((block,index) => {
+        return {...block._doc, tables: findTablesFromBlocks[index], sections: sections};
       })
-    ]
+
     const layout = {
       ...findLayout._doc,
       shapes: findShapes,
-      blocks
+      blocks: blocks
     };
+
     console.log("Success!");
     return res.status(201).json({ success: true, layout});
   } catch (error) {
