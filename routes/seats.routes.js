@@ -40,6 +40,7 @@ router.post("/:sectionId/automatic/create", async (req, res) => {
             status: "Available",
             row: seatRow,
             column: j,
+            section: sectionId
           });
           await newSeat.save();
           createdSeats.push(newSeat);

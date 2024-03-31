@@ -13,6 +13,7 @@ const layoutSchema = new Schema(
     y: { type: Number, default: 50 },
     status: String,
     capacity: Number,
+    venue: {type:Schema.Types.ObjectId, ref: "Venues"},
     blocks: [{ type: Schema.Types.ObjectId, ref: "Blocks" }],
     shapes: [{type: Schema.Types.ObjectId, ref: "Shapes"}]
   },

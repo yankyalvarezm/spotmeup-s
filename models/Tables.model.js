@@ -11,6 +11,9 @@ const tableSchema = new Schema(
     tickets: Number,
     isIncluded: Boolean,
     number: Number,
+    layout:{ type: Schema.Types.ObjectId, ref: "Layouts" },
+    block: { type: Schema.Types.ObjectId, ref: "Blocks" },
+    section:{ type: Schema.Types.ObjectId, ref: "Sections" }
   },
   {
     timestamps: true,

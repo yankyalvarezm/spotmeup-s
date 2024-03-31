@@ -43,6 +43,7 @@ const sectionSchema = new Schema(
         "Z",
       ],
     },
+    block:{ type: Schema.Types.ObjectId, ref: "Blocks" },
     seats: [{ type: Schema.Types.ObjectId, ref: "Seats" }],
     tables: [{ type: Schema.Types.ObjectId, ref: "Tables" }],
   },

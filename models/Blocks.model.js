@@ -13,6 +13,7 @@ const blockSchema = new Schema(
     bprice: Number,
     maxSection: Number,
     maxTables: Number,
+    layout: {type: Schema.Types.ObjectId, ref: "Layouts"},
     sections: [{ type: Schema.Types.ObjectId, ref: "Sections" }],
     tables: [{ type: Schema.Types.ObjectId, ref: "Tables" }],
     

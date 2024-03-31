@@ -66,6 +66,7 @@ router.post("/", async (req, res) => {
     });
 
     venue.layouts.push(layout._id);
+    layout.venue = venue._id
     await venue.save();
 
     const block = new BlocksModel({
@@ -83,6 +84,7 @@ router.post("/", async (req, res) => {
     });
 
     layout.blocks.push(block._id);
+    block.layout = layout._id
     await layout.save();
 
     const section = new SectionsModel({
@@ -112,7 +114,9 @@ router.post("/", async (req, res) => {
     });
     
     block.sections.push(section._id);
+    section.block = block._id;
     block.tables.push(tableBlocks._id);
+    tableBlocks.block = block._id;
     await block.save();
     await tableBlocks.save()
 
@@ -140,7 +144,9 @@ router.post("/", async (req, res) => {
       });
     
       section.seats.push(seat._id)
+      seat.section = section._id;
       section.tables.push(tableSection._id)
+      tableSection.section = section._id;
       await section.save()
       await tableSection.save()
       await seat.save()

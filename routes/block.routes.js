@@ -28,7 +28,7 @@ router.post("/:layoutId/create", async (req, res) => {
         .json({ success: false, message: "Block name taken." });
     }
 
-    const newBlock = new Blocks(req.body);
+    const newBlock = new Blocks({...req.body, layout:layoutId});
     await newBlock.save();
 
     const updatedLayout = await Layouts.findByIdAndUpdate(
