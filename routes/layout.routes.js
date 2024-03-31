@@ -300,8 +300,60 @@ router.get("/:layoutId/find", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Layout Not Found!" });
     }
+    let findShapes = [];
+    if(findLayout.shapes.length){
+      findShapes = await Shapes.find({_id:{$in: findLayout.shapes}})
+    }
+    let findBlocks = [];
+    if(findLayout.blocks.length){
+      findBlocks = await Blocks.find({_id:{$in: findLayout.blocks}})
+    }
+    let findSections = []
+    let findTablesFromBlocks = []
+    if(findBlocks.length){
+      for(let block of findBlocks){
+        if(block.sections.length){
+          findSections = await Sections.find({_id:{$in: block.sections}})
+        }
+        if(block.tables.length){
+          findTablesFromBlocks = await Tables.find({_id:{$in: block.tables}})
+        }
+      }
+    }
+    let seatsFromSections = []
+    let tablesFromSections = []
+    if(findSections.length){
+      for(let section of findSections){
+        
+        if(section.seats.length){
+          seatsFromSections = await Seats.find({_id:{$in: section.seats}})
+        }
+        if(section.tables.length){
+          tablesFromSections = await Tables.find({_id:{$in: section.tables}})
+        }
+      }
+    }
+    const sections = [
+      ...findSections.map((section) => {
+        section.seats = seatsFromSections;
+        section.tables = tablesFromSections;
+        return section;
+      })
+    ];
+    const blocks = [
+      ...findBlocks.map((block) => {
+        block.tables = findTablesFromBlocks;
+        block.sections = sections
+        return block;
+      })
+    ]
+    const layout = {
+      ...findLayout._doc,
+      shapes: findShapes,
+      blocks
+    };
     console.log("Success!");
-    return res.status(201).json({ success: true, layout: findLayout });
+    return res.status(201).json({ success: true, layout});
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Layout Find. Error Message: ",
@@ -310,6 +362,28 @@ router.get("/:layoutId/find", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
+
+/* Backup Find */
+// router.get("/:layoutId/find", async (req, res) => {
+//   const layoutId = req.params.layoutId;
+//   try {
+//     const findLayout = await Layouts.findById(layoutId);
+//     if (!findLayout) {
+//       console.error("\nError: Layout Not Found!");
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Layout Not Found!" });
+//     }
+//     console.log("Success!");
+//     return res.status(201).json({ success: true, layout: findLayout });
+//   } catch (error) {
+//     console.error(
+//       "\nCaught Error Backend in Layout Find. Error Message: ",
+//       error.message
+//     );
+//     res.status(500).json({ success: false, message: "Internal Server Error!" });
+//   }
+// });
 
 // Get All Layouts from one venue
 router.get("/:venueId/findAll", async (req, res) => {
