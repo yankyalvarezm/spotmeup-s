@@ -18,16 +18,18 @@ router.post("/:layoutId/create", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Layout Not Found!" });
     }
-
-    const blockExist = existingBlock.blocks.some(
-      (block) => block.name === blockName
-    );
-
-    if (blockExist) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Block Name Taken." });
+    if(blockName){
+      const blockExist = existingBlock.blocks.some(
+        (block) => block.name === blockName
+      );
+      if (blockExist) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Block Name Taken." });
+      }
+      
     }
+
 
     const newBlock = new Blocks(req.body);
     await newBlock.save();
