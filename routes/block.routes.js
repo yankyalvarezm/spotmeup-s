@@ -10,12 +10,13 @@ router.post("/:layoutId/create", async (req, res) => {
   const blockName = req.body.name;
 
   try {
+    // const existingBlock = await Layouts.findById(layoutId).populate("blocks");
     const existingBlock = await Layouts.findById(layoutId).populate("blocks");
 
     if (!existingBlock) {
       return res
         .status(404)
-        .json({ success: false, message: "Block doesn't exist" });
+        .json({ success: false, message: "Layout Not Found!" });
     }
 
     const blockExist = existingBlock.blocks.some(
@@ -25,7 +26,7 @@ router.post("/:layoutId/create", async (req, res) => {
     if (blockExist) {
       return res
         .status(400)
-        .json({ success: false, message: "Block name taken." });
+        .json({ success: false, message: "Block Name Taken." });
     }
 
     const newBlock = new Blocks(req.body);
@@ -44,9 +45,9 @@ router.post("/:layoutId/create", async (req, res) => {
       });
     }
 
-    return res.status(201).json({ success: true, layout: updatedLayout });
+    return res.status(201).json({ success: true, block: newBlock });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 });
 
