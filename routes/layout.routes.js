@@ -329,7 +329,7 @@ router.get("/:layoutId/find", async (req, res) => {
       "\nCaught Error Backend in Layout Find. Error Message: ",
       error.message
     );
-    res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res.status(500).json({ success: false, message: "Internal Server Error!" });
   }
 });
 

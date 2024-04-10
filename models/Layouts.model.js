@@ -1,4 +1,6 @@
 const { Schema, model } = require("mongoose");
+const Blocks = require("./Blocks.model");
+const Shapes = require("./Shapes.model");
 
 const layoutSchema = new Schema(
   {
@@ -22,5 +24,20 @@ const layoutSchema = new Schema(
     timestamps: true,
   }
 );
+
+layoutSchema.pre('deleteOne', {document:true, query:false},async function(next) {
+  // 'this' is the layout being removed. Pass it to the next middleware.
+  try {
+    const [blocks, shapes] = await Promise.all([Blocks.find({layout:this._id}), Shapes.find({layout:this._id})])
+    console.log("Deleting blocks and shapes from layout");
+    await Promise.all([...blocks, ...shapes].map(doc => {console.log("Deleting"); doc.deleteOne()}))
+    next();
+  } catch (error) {
+    console.error("Cascade Delete Error On Layouts Model");
+    throw error;
+  }
+
+
+});
 
 module.exports = model("Layouts", layoutSchema);
