@@ -8,7 +8,7 @@ const blockSchema = new Schema(
     width: Number,
     height: Number,
     status: String,
-    type: String,
+    blockType: String,
     capacity: Number,
     bprice: Number,
     maxSection: Number,
