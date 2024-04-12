@@ -28,7 +28,7 @@ router.post("/:blockId/create", async (req, res) => {
         .json({ success: false, message: "Section name taken." });
     }
 
-    const newSection = new Sections(req.body);
+    const newSection = new Sections({...req.body,blockId});
     await newSection.save();
 
     const updatedBlock = await Blocks.findByIdAndUpdate(

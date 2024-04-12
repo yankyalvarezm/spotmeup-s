@@ -25,23 +25,11 @@ const venueSchema = new Schema(
   }
 );
 
-// venueSchema.pre("deleteOne", {document:true, query:false}, async function (next) {
-//   try {
-//     const layouts = await Layouts.find({venue:this._id})
-//     console.log("Deleting layout from venue");
-//     await Promise.all(layouts.map((layout) => {console.log("Deleting");  layout.deleteOne()}))
-//     next();
-//   } catch (error) {
-//     console.error("Cascade Delete Error On Venues Model");
-//     throw error;
-//   }
-// });
-
 venueSchema.pre("deleteOne", {document:true, query:false}, async function (next) {
   try {
     const layouts = await Layouts.find({venue:this._id})
     console.log("Deleting layout from venue");
-    await Promise.all(layouts.map((layout) => {console.log("Deleting");  layout.deleteOne()}))
+    await Promise.all(layouts.map((layout) => layout.deleteOne().exec()))
     next();
   } catch (error) {
     console.error("Cascade Delete Error On Venues Model");

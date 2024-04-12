@@ -30,7 +30,7 @@ layoutSchema.pre('deleteOne', {document:true, query:false},async function(next) 
   try {
     const [blocks, shapes] = await Promise.all([Blocks.find({layout:this._id}), Shapes.find({layout:this._id})])
     console.log("Deleting blocks and shapes from layout");
-    await Promise.all([...blocks, ...shapes].map(doc => {console.log("Deleting"); doc.deleteOne()}))
+    await Promise.all([...blocks, ...shapes].map(doc => doc.deleteOne().exec()))
     next();
   } catch (error) {
     console.error("Cascade Delete Error On Layouts Model");

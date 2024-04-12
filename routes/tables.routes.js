@@ -34,6 +34,7 @@ router.post("/:blockId/automatic/create", async (req, res) => {
           tickets: 0,
           isIncluded: false,
           number: i,
+          blockId
         });
 
         console.log("New Tables:", newTables);
@@ -87,7 +88,7 @@ router.post("/:blockId/manual/create", async (req, res) => {
       }
     }
 
-    const newTable = new Tables({ ...tableData, number });
+    const newTable = new Tables({ ...tableData, number, blockId });
     await newTable.save();
 
     block.tables.push(newTable);
@@ -99,28 +100,73 @@ router.post("/:blockId/manual/create", async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+// router.post("/:blockId/manual/create", async (req, res) => {
+//   const blockId = req.params.blockId;
+//   const { number, ...tableData } = req.body;
+
+//   try {
+//     const block = await Blocks.findById(blockId).populate("tables");
+
+//     if (!block) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Block not found" });
+//     }
+
+//     const maxTableNum = block.maxTables;
+
+//     if (number > maxTableNum) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Max table limit exceeded",
+//       });
+//     }
+
+//     if (block.tables.length) {
+//       const tableExist = block.tables.some((table) => table.number === number);
+//       if (tableExist) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "A Table with this number already exist.",
+//         });
+//       }
+//     }
+
+//     const newTable = new Tables({ ...tableData, number, blockId });
+//     await newTable.save();
+
+//     block.tables.push(newTable);
+//     await block.save();
+
+//     return res.status(201).json({ success: true, block: block.tables });
+//   } catch (error) {
+//     console.log("Errorrr");
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// });
 
 // Edit
-router.put("/:blockId/:tableId/edit", async (req, res) => {
-  const { blockId, tableId } = req.params;
+router.put("/:tableId/edit", async (req, res) => {
+  const { tableId } = req.params;
 
   const { number, ...tableData } = req.body;
 
   try {
+    
+    const tableToUpdate = await Tables.findById(tableId);
+    if (!tableToUpdate) {
+      return res
+      .status(404)
+      .json({ success: false, message: "Table not found" });
+    }
+    const {block:blockId} = tableToUpdate
     const block = await Blocks.findById(blockId).populate("tables");
     if (!block) {
       return res
         .status(404)
         .json({ success: false, message: "Block not found" });
     }
-
-    const tableToUpdate = await Tables.findById(tableId);
-    if (!tableToUpdate) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Table not found" });
-    }
-
+    
     if (number !== tableToUpdate.number) {
       const tableExist = block.tables.some((table) => table.number === number);
       console.log("Line 128 - Table Exist:", tableExist);
@@ -151,11 +197,18 @@ router.put("/:blockId/:tableId/edit", async (req, res) => {
 });
 
 // Delete & Unassign
-router.delete("/:blockId/:tableId/delete", async (req, res) => {
-  const blockId = req.params.blockId;
+router.delete("/:tableId/delete", async (req, res) => {
+  // const blockId = req.params.blockId;
   const tableId = req.params.tableId;
 
   try {
+    const table = await Tables.findById(tableId);
+    if (!table) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seats not found." });
+    }
+    const {block:blockId} = table
     const block = await Blocks.findById(blockId);
     if (!block) {
       return res
@@ -172,13 +225,7 @@ router.delete("/:blockId/:tableId/delete", async (req, res) => {
     block.tables = block.tables.filter((id) => id.toHexString() !== tableId);
     await block.save();
 
-    const table = await Tables.findById(tableId);
 
-    if (!table) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seats not found." });
-    }
 
     await Tables.findByIdAndDelete(tableId);
 

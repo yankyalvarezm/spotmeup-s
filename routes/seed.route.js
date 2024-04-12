@@ -63,10 +63,11 @@ router.post("/", async (req, res) => {
       height: Math.floor(Math.random() * 10),
       status: "Available",
       capacity: Math.floor(Math.random() * 100),
+      venue: venue._id
     });
 
     venue.layouts.push(layout._id);
-    layout.venue = venue._id
+    // layout.venue = venue._id
     await venue.save();
 
     const block = new BlocksModel({
@@ -81,10 +82,11 @@ router.post("/", async (req, res) => {
       bprice: Math.floor(Math.random() * 100),
       maxSection: Math.floor(Math.random() * 100),
       maxTables: Math.floor(Math.random() * 100),
+      layout:layout._id
     });
 
     layout.blocks.push(block._id);
-    block.layout = layout._id
+    // block.layout = layout._id
     await layout.save();
 
     const section = new SectionsModel({
@@ -99,8 +101,9 @@ router.post("/", async (req, res) => {
       tickets: Math.floor(Math.random() * 100),
       maxCol: Math.floor(Math.random() * 100),
       maxRow: alphabet[Math.floor(Math.random() * alphabet.length - 1)],
+      block: block._id
     });
-
+    
     const tableBlocks = new TablesModel({
       x: Math.floor(Math.random() * 10),
       y: Math.floor(Math.random() * 10),
@@ -111,12 +114,13 @@ router.post("/", async (req, res) => {
       tickets: Math.floor(Math.random() * 10),
       isIncluded: true,
       number: Math.floor(Math.random() * 10),
+      block: block._id
     });
     
     block.sections.push(section._id);
-    section.block = block._id;
+    // section.block = block._id;
     block.tables.push(tableBlocks._id);
-    tableBlocks.block = block._id;
+    // tableBlocks.block = block._id;
     await block.save();
     await tableBlocks.save()
 
@@ -129,29 +133,35 @@ router.post("/", async (req, res) => {
       cprice: Math.floor(Math.random() * 10),
       row: alphabet[Math.floor(Math.random() * alphabet.length - 1)],
       column: Math.floor(Math.random() * 10),
+      section: section._id
     });
-
+    
     const tableSection = new TablesModel({
-        x: Math.floor(Math.random() * 10),
-        y: Math.floor(Math.random() * 10),
-        width: Math.floor(Math.random() * 10),
-        height: Math.floor(Math.random() * 10),
-        status: "Available",
-        cprice: Math.floor(Math.random() * 10),
-        tickets: Math.floor(Math.random() * 10),
-        isIncluded: true,
-        number: Math.floor(Math.random() * 10),
-      });
+      x: Math.floor(Math.random() * 10),
+      y: Math.floor(Math.random() * 10),
+      width: Math.floor(Math.random() * 10),
+      height: Math.floor(Math.random() * 10),
+      status: "Available",
+      cprice: Math.floor(Math.random() * 10),
+      tickets: Math.floor(Math.random() * 10),
+      isIncluded: true,
+      number: Math.floor(Math.random() * 10),
+      section: section._id
+    });
     
       section.seats.push(seat._id)
-      seat.section = section._id;
+      // seat.section = section._id;
       section.tables.push(tableSection._id)
-      tableSection.section = section._id;
+      // tableSection.section = section._id;
       await section.save()
       await tableSection.save()
       await seat.save()
 
       console.log("Seed Completed");
+      
+      await fetch(`http://localhost:3000/venue/${venue._id}/delete`, {
+        method: 'DELETE'
+      })
       return res.status(200).send(`Seed Completed!
                                     \nVenueID: ${venue._id}
                                     \nLayout: ${layout._id}
@@ -159,9 +169,19 @@ router.post("/", async (req, res) => {
                                     \nSection: ${section._id}`)
 
   } catch (error) {
-    console.log("Error Seeding Database");
+    console.log("Error Seeding Database", error.message);
   }
 });
+
+router.delete('/reset', async (req, res)=> {
+  await VenuesModel.deleteMany()
+  await LayoutsModel.deleteMany()
+  await BlocksModel.deleteMany()
+  await SectionsModel.deleteMany()
+  await TablesModel.deleteMany()
+  await SeatsModel.deleteMany()
+  return res.status(200).send("DONE!")
+})
 
 
 module.exports = router;

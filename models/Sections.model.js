@@ -54,20 +54,11 @@ const sectionSchema = new Schema(
   }
 );
 
-sectionSchema.pre('deleteOne', {document:true, query:false},async (next) => {
+sectionSchema.pre('deleteOne', {document:true, query:false},async function (next) {
   try {
-    // await Promise.all(this.seats.map(async (seatId) => {
-    //   const seat = await Seats.findById(seatId)
-    //   await seat.remove()
-    // }))
-    // await Promise.all(this.tables.map(async (tableId) => {
-    //   const table = await Tables.findById(tableId)
-    //   await table.remove()
-    // }))
-
     const [seats, tables] = await Promise.all([Seats.find({section:this._id}), Tables.find({section:this._id})])
     console.log("Deleting seats and tables from section");
-    await Promise.all([...seats, ...tables].map((doc) => {console.log("Deleting"); doc.deleteOne()}))
+    await Promise.all([...seats, ...tables].map((doc) => doc.deleteOne().exec()))
     next()
   } catch (error) {
     console.error("Cascade Delete Error On Sections Model");
