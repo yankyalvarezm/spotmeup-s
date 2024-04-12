@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose");
 
 const blockSchema = new Schema(
   {
-    name: String,
+    name: {type: String, default: ""},
     status: String,
     blockType: String,
     capacity: Number,
