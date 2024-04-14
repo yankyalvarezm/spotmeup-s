@@ -100,7 +100,7 @@ router.post("/:blockId/automatic/create", async (req, res) => {
 //   }
 // });
 
-router.post("/:blockId/create", async (req, res) => {
+router.post("/b/:blockId/create", async (req, res) => {
   const {blockId} = req.params
   const {number} = req.body;
   try {
@@ -258,7 +258,7 @@ router.get("/:tableId/find", async (req, res) => {
         .json({ success: false, message: "Table not found." });
         }
 
-        return res.status(201).json({ success: true, block: findTable });
+        return res.status(201).json({ success: true, table: findTable });
 
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
