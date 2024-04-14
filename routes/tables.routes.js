@@ -93,7 +93,7 @@ router.post("/:blockId/manual/create", async (req, res) => {
     block.tables.push(newTable);
     await block.save();
 
-    return res.status(201).json({ success: true, block: block.tables });
+    return res.status(201).json({ success: true, table: newTable });
   } catch (error) {
     console.log("Errorrr");
     res.status(400).json({ success: false, message: error.message });
