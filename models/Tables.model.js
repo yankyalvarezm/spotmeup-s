@@ -10,7 +10,7 @@ const tableSchema = new Schema(
     tickets: Number,
     isIncluded: Boolean,
     number: Number,
-    
+    name: {type: String, default: ""},
     x: {type: Number, default:0},
     y: {type: Number, default:0},
     z: {type: Number, default:0},
