@@ -119,9 +119,9 @@ router.get("/:blockId/find", async (req, res) => {
       if (!findBlock) {
         return res
           .status(404)
-          .json({ success: false, message: "Layout not found." });
+          .json({ success: false, message: "Block not found." });
       }
-      return res.status(201).json({ success: true, layout: findBlock });
+      return res.status(201).json({ success: true, block: findBlock });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }

@@ -4,6 +4,7 @@ const Blocks = require("./Blocks.model");
 
 const tableSchema = new Schema(
   {
+    tableType: String,
     x: Number,
     y: Number,
     width: Number,
@@ -20,7 +21,6 @@ const tableSchema = new Schema(
     timestamps: true,
   }
 );
-
 tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
   const Tables = mongoose.model("Tables")
   try {

@@ -5,8 +5,11 @@ const blockSchema = new Schema(
     name: {type: String, default: ""},
     status: String,
     blockType: String,
+    blockTableType: String, // If Block Type is "Circle" then this should be "addTableCircle" if "Square" then this should be "addTableSquare"
     capacity: Number,
     bprice: Number,
+    maxRow: {type: Number, default: 0}, //Table Prop
+    maxCol: {type: Number, default: 0}, //Table Prop
     maxSection: {type:Number, default: 4},
     maxTables: {type:Number, default: 4},
     width: { type: Number, default: 100 },
