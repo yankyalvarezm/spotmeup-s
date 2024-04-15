@@ -58,16 +58,22 @@ router.put("/:blockId/edit", async (req, res) => {
   const blockId = req.params.blockId;
 
   try {
-    const updatedBlock = await Blocks.findByIdAndUpdate(blockId, req.body, {
-      new: true,
-    });
-
+    // const updatedBlock = await Blocks.findByIdAndUpdate(blockId, req.body, {
+    //   new: true,
+    // });
+    const updatedBlock = await Blocks.findById(blockId)
     if (!updatedBlock) {
       return res
         .status(404)
         .json({ success: false, message: "Block not found." });
     }
-
+    for(let key in req.body){
+      if(key in updatedBlock){
+        updatedBlock[key] = req.body[key]
+      }
+    }
+    await updatedBlock.save()
+    
     return res.status(201).json({ success: true, block: updatedBlock });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });

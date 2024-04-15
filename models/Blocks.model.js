@@ -11,7 +11,7 @@ const blockSchema = new Schema(
     maxRow: {type: Number, default: 0}, //Table Prop
     maxCol: {type: Number, default: 0}, //Table Prop
     maxSection: {type:Number, default: 4},
-    maxTables: {type:Number, default: 4},
+    maxTables: Number,
     width: { type: Number, default: 100 },
     height: { type: Number, default: 100 },
     border: { type: String, trim: true },
@@ -45,4 +45,8 @@ const blockSchema = new Schema(
   }
 );
 
+blockSchema.pre('save', function(next) {
+  this.maxTables = this.maxRow * this.maxCol;
+  next();
+});
 module.exports = model("Blocks", blockSchema);
