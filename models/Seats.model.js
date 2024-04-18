@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const Sections = require("./Sections.model");
 
 const seatSchema = new Schema(
   {
@@ -18,5 +19,24 @@ const seatSchema = new Schema(
     timestamps: true,
   }
 );
+
+
+seatSchema.pre('deleteOne', {document:true, query:false}, async function(next){
+  try {
+    const section = await Sections.findById(this.section)
+    if(section){
+      section.seats = section.seats.filter(seatId => seatId.toString() != this._id.toString())
+      await section.save().exec()
+    }
+    else{
+      console.error("section Not Found!")
+    }
+    next()
+  } catch (error) {
+    console.error("Cascade Delete Error On Seats Model");
+    throw error;
+
+  }
+})
 
 module.exports = model("Seats", seatSchema);

@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const Seats = require("./Seats.model");
 const Tables= require("./Tables.model");
+const Blocks = require("./Blocks.model");
 
 const sectionSchema = new Schema(
   {
@@ -56,6 +57,9 @@ const sectionSchema = new Schema(
 
 sectionSchema.pre('deleteOne', {document:true, query:false},async function (next) {
   try {
+    const block = await Blocks.findById(this.block)
+    block.sections= block.sections.filter(sectionId => sectionId.toString() != this._id.toString())
+    await block.save().exec()
     const [seats, tables] = await Promise.all([Seats.find({section:this._id}), Tables.find({section:this._id})])
     console.log("Deleting seats and tables from section");
     await Promise.all([...seats, ...tables].map((doc) => doc.deleteOne().exec()))

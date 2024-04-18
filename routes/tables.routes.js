@@ -56,50 +56,6 @@ router.post("/:blockId/automatic/create", async (req, res) => {
 });
 
 // Create & Assign - Manual
-router.post("/:blockId/manual/create", async (req, res) => {
-  const blockId = req.params.blockId;
-  const { number, ...tableData } = req.body;
-
-  try {
-    const block = await Blocks.findById(blockId).populate("tables");
-
-    if (!block) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Block not found" });
-    }
-
-    const maxTableNum = block.maxTables;
-
-    if (number > maxTableNum) {
-      return res.status(404).json({
-        success: false,
-        message: "Max table limit exceeded",
-      });
-    }
-
-    if (block.tables.length) {
-      const tableExist = block.tables.some((table) => table.number === number);
-      if (tableExist) {
-        return res.status(404).json({
-          success: false,
-          message: "A Table with this number already exist.",
-        });
-      }
-    }
-
-    const newTable = new Tables({ ...tableData, number, blockId });
-    await newTable.save();
-
-    block.tables.push(newTable);
-    await block.save();
-
-    return res.status(201).json({ success: true, block: block.tables });
-  } catch (error) {
-    console.log("Errorrr");
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
 // router.post("/:blockId/manual/create", async (req, res) => {
 //   const blockId = req.params.blockId;
 //   const { number, ...tableData } = req.body;
@@ -132,44 +88,77 @@ router.post("/:blockId/manual/create", async (req, res) => {
 //       }
 //     }
 
-//     const newTable = new Tables({ ...tableData, number, blockId });
+//     const newTable = new Tables({ ...tableData, number });
 //     await newTable.save();
 
 //     block.tables.push(newTable);
 //     await block.save();
 
-//     return res.status(201).json({ success: true, block: block.tables });
+//     return res.status(201).json({ success: true, table: newTable });
 //   } catch (error) {
-//     console.log("Errorrr");
+//     console.error("Error:", error.message);
 //     res.status(400).json({ success: false, message: error.message });
 //   }
 // });
 
+router.post("/b/:blockId/create", async (req, res) => {
+  const {blockId} = req.params
+  const {number} = req.body;
+  try {
+    const block = await Blocks.findById(blockId).populate("tables")
+    if(!block){
+      console.error("\nError: Block Not Found!")
+      return res.status(404).json({success: false, message: "Block Not Found!"})
+    }
+    if(block.tables.length === block.maxTables){
+      console.error("\nError: Table Limit Reached!")
+      return res.status(400).json({success:false, message:"Table Limit Reached!"})
+    }
+    if(number > block.maxTables){
+      console.error("\nError: Table Number Exceed Limit!")
+      return res.status(400).json({success:false, message:"Table Number Exceed Limit!"})
+    }
+    const tableExist = block.tables.some(table => number === table.number)
+    if(tableExist){
+      console.error("Error: A Table With This Number Exists")
+      return res.status(400).json({success:false, message:"A Table With This Number Exists"})
+    }
+    const newTable = new Tables({...req.body, block: blockId});
+    block.tables.push(newTable._id);
+    await block.save();
+    await newTable.save();
+    console.log("Success!")
+    return res.status(201).json({success: true, message:"OK", table: newTable})
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ success: false, message:  "Internal Server Error" });
+  }
+})
+
 // Edit
 router.put("/:tableId/edit", async (req, res) => {
-  const { tableId } = req.params;
-
-  const { number, ...tableData } = req.body;
+  const {tableId } = req.params;
+  const { number } = req.body;
 
   try {
-    
-    const tableToUpdate = await Tables.findById(tableId);
-    if (!tableToUpdate) {
+    const table = await Tables.findById(tableId);
+    if (!table) {
       return res
-      .status(404)
-      .json({ success: false, message: "Table not found" });
+        .status(404)
+        .json({ success: false, message: "Table not found" });
     }
-    const {block:blockId} = tableToUpdate
-    const block = await Blocks.findById(blockId).populate("tables");
+    const block = await Blocks.findById(table.block).populate("tables");
+
     if (!block) {
       return res
         .status(404)
         .json({ success: false, message: "Block not found" });
     }
-    
-    if (number !== tableToUpdate.number) {
+
+
+    if (number !== table.number) {
       const tableExist = block.tables.some((table) => table.number === number);
-      console.log("Line 128 - Table Exist:", tableExist);
+      // console.log("Line 128 - Table Exist:", tableExist);
 
       if (tableExist) {
         return res.status(404).json({
@@ -178,62 +167,83 @@ router.put("/:tableId/edit", async (req, res) => {
         });
       }
     }
-
-    const updatedTable = await Tables.findByIdAndUpdate(tableId, {
-      number,
-      ...tableData,
-    });
-
-    if (!updatedTable) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Table not updated." });
+    for (let key in req.body) {
+      if (key in table) { 
+          table[key] = req.body[key];
+      }
     }
+    table.save();
+    // const updatedTable = await Tables.findByIdAndUpdate(tableId, {
+    //   number,
+    //   ...tableData,
+    // });
 
-    return res.status(201).json({ success: true, table: updatedTable });
+    // if (!updatedTable) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "Table not updated." });
+    // }
+
+    return res.status(200).json({ success: true, table });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
 });
 
 // Delete & Unassign
-router.delete("/:tableId/delete", async (req, res) => {
-  // const blockId = req.params.blockId;
-  const tableId = req.params.tableId;
+// router.delete("/:tableId/delete", async (req, res) => {
+//   const blockId = req.params.blockId;
+//   const tableId = req.params.tableId;
 
+//   try {
+//     const block = await Blocks.findById(blockId);
+//     if (!block) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Block not found." });
+//     }
+
+//     if (!block.tables.includes(tableId)) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Table not found in Block." });
+//     }
+
+//     block.tables = block.tables.filter((id) => id.toHexString() !== tableId);
+//     await block.save();
+
+//     const table = await Tables.findById(tableId);
+
+//     if (!table) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Seats not found." });
+//     }
+
+//     await Tables.findByIdAndDelete(tableId);
+
+//     return res.status(201).json({ success: true, message: "Table removed." });
+//   } catch (error) {
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// });
+
+router.delete("/:tableId/delete", async (req, res) => {
+  const {tableId} = req.params
   try {
     const table = await Tables.findById(tableId);
-    if (!table) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seats not found." });
-    }
-    const {block:blockId} = table
-    const block = await Blocks.findById(blockId);
-    if (!block) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Block not found." });
+    if(!table){
+      console.error("\nError: Table Not Found!")
+      return res.status(404).json({success:false,message:"Table Not Found!"})
     }
 
-    if (!block.tables.includes(tableId)) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Table not found in Block." });
-    }
-
-    block.tables = block.tables.filter((id) => id.toHexString() !== tableId);
-    await block.save();
-
-
-
-    await Tables.findByIdAndDelete(tableId);
-
-    return res.status(201).json({ success: true, message: "Table removed." });
+    await table.deleteOne();
+    return res.status(200).json({success: true, message:"OK"})
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("Error:", error.message);
+    return res.status(500).json({ success: false, message: error.message });
   }
-});
+})
 
 // Get One
 router.get("/:tableId/find", async (req, res) => {
@@ -242,14 +252,13 @@ router.get("/:tableId/find", async (req, res) => {
     try {
         const findTable = await Tables.findById(tableId)
 
-
         if(!findTable){
             return res
         .status(404)
         .json({ success: false, message: "Table not found." });
         }
 
-        return res.status(201).json({ success: true, block: findTable });
+        return res.status(201).json({ success: true, table: findTable });
 
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });

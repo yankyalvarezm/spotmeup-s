@@ -116,13 +116,51 @@ router.post("/", async (req, res) => {
       number: Math.floor(Math.random() * 10),
       block: block._id
     });
+    const tableBlocks1 = new TablesModel({
+      x: Math.floor(Math.random() * 10),
+      y: Math.floor(Math.random() * 10),
+      width: Math.floor(Math.random() * 10),
+      height: Math.floor(Math.random() * 10),
+      status: "Available",
+      cprice: Math.floor(Math.random() * 10),
+      tickets: Math.floor(Math.random() * 10),
+      isIncluded: true,
+      block: block._id,
+      number: 1,
+    });
+    const tableBlocks2 = new TablesModel({
+      x: Math.floor(Math.random() * 10),
+      y: Math.floor(Math.random() * 10),
+      width: Math.floor(Math.random() * 10),
+      height: Math.floor(Math.random() * 10),
+      status: "Available",
+      cprice: Math.floor(Math.random() * 10),
+      tickets: Math.floor(Math.random() * 10),
+      isIncluded: true,
+      block: block._id,
+      number: 2,
+    });
+    // const tableBlocks = new TablesModel({
+    //   x: Math.floor(Math.random() * 10),
+    //   y: Math.floor(Math.random() * 10),
+    //   width: Math.floor(Math.random() * 10),
+    //   height: Math.floor(Math.random() * 10),
+    //   status: "Available",
+    //   cprice: Math.floor(Math.random() * 10),
+    //   tickets: Math.floor(Math.random() * 10),
+    //   isIncluded: true,
+    //   number: Math.floor(Math.random() * 10),
+    // });
     
     block.sections.push(section._id);
     // section.block = block._id;
     block.tables.push(tableBlocks._id);
     // tableBlocks.block = block._id;
     await block.save();
-    await tableBlocks.save()
+    // await tableBlocks.save()
+    await tableBlocks0.save()
+    await tableBlocks1.save()
+    await tableBlocks2.save()
 
     const seat = new SeatsModel({
       x: Math.floor(Math.random() * 10),
@@ -166,7 +204,10 @@ router.post("/", async (req, res) => {
                                     \nVenueID: ${venue._id}
                                     \nLayout: ${layout._id}
                                     \nBlock: ${block._id}
-                                    \nSection: ${section._id}`)
+                                    \nSection: ${section._id}
+                                    \ntableBlocks0:${tableBlocks0._id}
+                                    \ntableBlocks1:${tableBlocks1._id}
+                                    \ntableBlocks2:${tableBlocks2._id}`)
 
   } catch (error) {
     console.log("Error Seeding Database", error.message);
