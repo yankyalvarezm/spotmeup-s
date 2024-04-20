@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const Seats = require("./Seats.model");
 const Tables= require("./Tables.model");
-const Blocks = require("./Blocks.model");
+// const Blocks = require("./Blocks.model");
 
 const sectionSchema = new Schema(
   {
@@ -56,13 +56,20 @@ const sectionSchema = new Schema(
 );
 
 sectionSchema.pre('deleteOne', {document:true, query:false},async function (next) {
+  const Blocks = model("Blocks")
   try {
     const block = await Blocks.findById(this.block)
-    block.sections= block.sections.filter(sectionId => sectionId.toString() != this._id.toString())
-    await block.save().exec()
-    const [seats, tables] = await Promise.all([Seats.find({section:this._id}), Tables.find({section:this._id})])
-    console.log("Deleting seats and tables from section");
-    await Promise.all([...seats, ...tables].map((doc) => doc.deleteOne().exec()))
+    if(block){
+      block.sections= block.sections.filter(sectionId => sectionId.toString() != this._id.toString())
+      await block.save()
+      // const [seats] = await Promise.all([Seats.find({section:this._id})])
+      console.log("Deleting seats and tables from section");
+      // await Promise.all([...seats].map((doc) => doc.deleteOne().exec()))
+      await Tables.deleteMany({section:this._id})
+      await Seats.deleteMany({section:this._id})
+    } else{
+      console.error("block Not Found!")
+    }
     next()
   } catch (error) {
     console.error("Cascade Delete Error On Sections Model");

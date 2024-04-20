@@ -5,58 +5,125 @@ const Blocks = require("../models/Blocks.model");
 const Tables = require("../models/Tables.model");
 
 // Create & Assign - Automatic
-router.post("/:blockId/automatic/create", async (req, res) => {
-  const blockId = req.params.blockId;
+// router.post("/:blockId/automatic/create", async (req, res) => {
+//   const blockId = req.params.blockId;
 
+//   try {
+//     const block = await Blocks.findById(blockId).populate("tables");
+
+//     if (!block) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Block doesn't exist" });
+//     }
+
+//     const maxTables = block.maxTables;
+//     let createdTables = [];
+
+//     for (let i = 1; i <= maxTables; i++) {
+//       const tableExist = block.tables.some((table) => table.number === i);
+//       console.log("Table Exist:", tableExist);
+//       if (!tableExist) {
+//         const newTables = new Tables({
+//           x: 0,
+//           y: 0,
+//           width: 80,
+//           heigth: 80,
+//           status: "Available",
+//           cprice: 0,
+//           tickets: 0,
+//           isIncluded: false,
+//           number: i,
+//           blockId
+//         });
+
+//         console.log("New Tables:", newTables);
+//         await newTables.save();
+//         createdTables.push(newTables);
+//       }
+//     }
+
+//     if (createdTables.length > 0) {
+//       block.tables.push(...createdTables.map((table) => table._id));
+//       await block.save();
+//     }
+
+//     return res.status(201).json({ success: true, newTables: createdTables });
+//   } catch (error) {
+//     console.log("Errorrr");
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// });
+
+router.post("/b/:blockId/create/fill", async (req, res) => {
+  const { blockId } = req.params;
+  const {tableType} = req.body
+  const tablePromises = []
+
+  //* Verifying blockId
+  //! If blockId is not given returns an error 400
+  if(!blockId){
+    console.error("\nError: Please Specify a Block Id!")
+    return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+  }
+  //* Verifying tableType
+  //! If tableType is not given returns an error 400
+  if(!tableType){
+    console.error("\nError: Please Specify a Table Type!")
+    return res.status(400).json({success:false, message:"Please Specify a Table Type!"})
+  }
   try {
-    const block = await Blocks.findById(blockId).populate("tables");
-
+    //* Getting Block
+    const block = await Blocks.findById(blockId);
+    //! If block not found return an error 404
     if (!block) {
       return res
         .status(404)
-        .json({ success: false, message: "Block doesn't exist" });
+        .json({ success: false, message: "Block not found" });
     }
-
-    const maxTables = block.maxTables;
-    let createdTables = [];
-
-    for (let i = 1; i <= maxTables; i++) {
-      const tableExist = block.tables.some((table) => table.number === i);
-      console.log("Table Exist:", tableExist);
-      if (!tableExist) {
-        const newTables = new Tables({
-          x: 0,
-          y: 0,
-          width: 80,
-          heigth: 80,
+    //* Verifying If block has both maxRow and maxCol greater than 0.
+    //! If maxRow and maxCol are less than or equal to zero, returns an error 400
+    if(block.maxRow <= 0 || block.maxCol <= 0){
+      console.error("\nError: Block Needs A Max Row And Max Col Greater Than 0!")
+      return res.status(400).json({success:false, message:"Block Needs A Max Row And Max Col Greater Than 0!"})
+    }
+    //* For loop creating tables and assigning x, y and number in it along with some default values.
+    let tableNumber = 1;
+    for (let i = 0; i < block.maxRow; i++) {
+      for(let j = 0; j<block.maxCol; j++){
+        const newTable = new Tables({
+          tableType,
+          x: i,
+          y: j,
           status: "Available",
           cprice: 0,
-          tickets: 0,
+          tickets: 1,
           isIncluded: false,
-          number: i,
-          blockId
+          number: tableNumber++,
+          block: blockId,
         });
-
-        console.log("New Tables:", newTables);
-        await newTables.save();
-        createdTables.push(newTables);
+        block.tables.push(newTable._id);
+        tablePromises.push(newTable.save());
       }
     }
+    //* Saving all changes
+    await Promise.all(tablePromises)
+    await block.save();
+    //* Getting all tables from block
+    const {tables} = await block.populate("tables").execPopulate();
 
-    if (createdTables.length > 0) {
-      block.tables.push(...createdTables.map((table) => table._id));
-      await block.save();
-    }
-
-    return res.status(201).json({ success: true, newTables: createdTables });
+    //* Returning a status 201 along with the newly created tables.
+    console.log("Success!")
+    return res.status(201).json({success: true, message:"OK", tables})
   } catch (error) {
-    console.log("Errorrr");
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error Table Create Fill. Error:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
 
 // Create & Assign - Manual
-// router.post("/:blockId/manual/create", async (req, res) => {
+
+//router.post("/:blockId/manual/create", async (req, res) => {
 //   const blockId = req.params.blockId;
 //   const { number, ...tableData } = req.body;
 
@@ -104,6 +171,14 @@ router.post("/:blockId/automatic/create", async (req, res) => {
 router.post("/b/:blockId/create", async (req, res) => {
   const {blockId} = req.params
   const {number} = req.body;
+  if(!blockId){
+    console.error("\nError: Please Specify a Block Id!")
+    return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+  }
+  if(number < 0 || number === null || number === undefined){
+    console.error("\nError: Please Specify a Table Number!")
+    return res.status(400).json({success:false, message:"Please Specify a Table Number!"})
+  }
   try {
     const block = await Blocks.findById(blockId).populate("tables")
     if(!block){
@@ -130,8 +205,8 @@ router.post("/b/:blockId/create", async (req, res) => {
     console.log("Success!")
     return res.status(201).json({success: true, message:"OK", table: newTable})
   } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ success: false, message:  "Internal Server Error" });
+    console.error("\nCaught Error In Table Create. Error:", error.message);
+    return res.status(500).json({ success: false, message:  "Internal Server Error" });
   }
 })
 
@@ -186,7 +261,8 @@ router.put("/:tableId/edit", async (req, res) => {
 
     return res.status(200).json({ success: true, table });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("\nCaught Error In Table Edit. Error:", error.message);
+    return res.status(500).json({ success: false, message:  "Internal Server Error" });
   }
 });
 

@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Sections = require("./Sections.model");
 
 const seatSchema = new Schema(
   {
@@ -22,11 +21,12 @@ const seatSchema = new Schema(
 
 
 seatSchema.pre('deleteOne', {document:true, query:false}, async function(next){
+  const Sections = model("Sections")
   try {
     const section = await Sections.findById(this.section)
     if(section){
       section.seats = section.seats.filter(seatId => seatId.toString() != this._id.toString())
-      await section.save().exec()
+      await section.save()
     }
     else{
       console.error("section Not Found!")

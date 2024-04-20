@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-const Layouts = require("./Layouts.model");
+// const Layouts = require("./Layouts.model");
 
 const shapeSchema = new Schema(
   {
@@ -35,11 +35,12 @@ const shapeSchema = new Schema(
 );
 
 shapeSchema.pre('deleteOne', {document: true, query: false}, async function(next){
+  const Layouts = model("Layouts")
   try {
     const layout = await Layouts.findById(this.layout)
     if(layout){
       layout.shapes = layout.shapes.filter(shapeId => shapeId.toString() != this._id.toString())
-      await layout.save().exec()
+      await layout.save()
     }
     else{
       console.error("layout Not Found!")

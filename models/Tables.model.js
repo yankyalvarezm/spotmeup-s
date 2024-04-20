@@ -1,7 +1,4 @@
-const { Schema, model, mongoose } = require("mongoose");
-const Blocks = require("./Blocks.model");
-const Sections = require("./Sections.model");
-
+const { Schema, model } = require("mongoose");
 
 const tableSchema = new Schema(
   {
@@ -15,6 +12,8 @@ const tableSchema = new Schema(
     x: {type: Number, default:0},
     y: {type: Number, default:0},
     z: {type: Number, default:0},
+    row: {type: Number, default:0},
+    col: {type: Number, default:0},
     width: {type: Number, default: 100},
     height: {type: Number, default: 100},
     border: {type:String, trim:true},
@@ -44,7 +43,9 @@ const tableSchema = new Schema(
 );
 
 tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
-  const Tables = mongoose.model("Tables")
+  const Blocks = model("Blocks")
+  const Sections = model("Sections")
+  const Tables = model("Tables")
   try {
     const block = await Blocks.findById(this.block)
     const section = await Sections.findById(this.section)
@@ -52,7 +53,7 @@ tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) 
       let start = block.tables.indexOf(this._id)
       block.tables = block.tables.filter(id => id.toString() != this._id.toString())
       await block.save()
-      for(let i=start ;i<block.tables.length;i++){
+      for(let i=start;i<block.tables.length;i++){
         const table = await Tables.findById(block.tables[i])
         if(table){
           table.number=i
@@ -73,11 +74,12 @@ tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) 
       }
     }
     else{
+      console.log(this.block, this.section);
       console.error("block and/or section Not Found!")
     }
     next()
   } catch (error) {
-
+    console.error(error)
     throw error
   }
 })

@@ -104,7 +104,7 @@ router.post("/", async (req, res) => {
       block: block._id
     });
     
-    const tableBlocks = new TablesModel({
+    const tableBlocks0 = new TablesModel({
       x: Math.floor(Math.random() * 10),
       y: Math.floor(Math.random() * 10),
       width: Math.floor(Math.random() * 10),
@@ -140,24 +140,25 @@ router.post("/", async (req, res) => {
       block: block._id,
       number: 2,
     });
-    // const tableBlocks = new TablesModel({
-    //   x: Math.floor(Math.random() * 10),
-    //   y: Math.floor(Math.random() * 10),
-    //   width: Math.floor(Math.random() * 10),
-    //   height: Math.floor(Math.random() * 10),
-    //   status: "Available",
-    //   cprice: Math.floor(Math.random() * 10),
-    //   tickets: Math.floor(Math.random() * 10),
-    //   isIncluded: true,
-    //   number: Math.floor(Math.random() * 10),
-    // });
+    const tableBlocks = new TablesModel({
+      x: Math.floor(Math.random() * 10),
+      y: Math.floor(Math.random() * 10),
+      width: Math.floor(Math.random() * 10),
+      height: Math.floor(Math.random() * 10),
+      status: "Available",
+      cprice: Math.floor(Math.random() * 10),
+      tickets: Math.floor(Math.random() * 10),
+      isIncluded: true,
+      number: Math.floor(Math.random() * 10),
+      block: block._id,
+    });
     
     block.sections.push(section._id);
     // section.block = block._id;
     block.tables.push(tableBlocks._id);
     // tableBlocks.block = block._id;
     await block.save();
-    // await tableBlocks.save()
+    await tableBlocks.save()
     await tableBlocks0.save()
     await tableBlocks1.save()
     await tableBlocks2.save()
@@ -197,9 +198,27 @@ router.post("/", async (req, res) => {
 
       console.log("Seed Completed");
       
-      await fetch(`http://localhost:3000/venue/${venue._id}/delete`, {
-        method: 'DELETE'
-      })
+      // await fetch(`http://localhost:3000/venue/${venue._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/layout/${layout._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/block/${block._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/tables/${tableBlocks._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/tables/${tableBlocks0._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/tables/${tableBlocks1._id}/delete`, {
+      //   method: 'DELETE'
+      // })
+      // await fetch(`http://localhost:3000/tables/${tableBlocks2._id}/delete`, {
+      //   method: 'DELETE'
+      // })
       return res.status(200).send(`Seed Completed!
                                     \nVenueID: ${venue._id}
                                     \nLayout: ${layout._id}

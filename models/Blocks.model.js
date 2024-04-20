@@ -1,7 +1,6 @@
 const { Schema, model } = require("mongoose");
 const Sections = require("./Sections.model");
 const Tables = require("./Tables.model");
-const Layouts = require("./Layouts.model");
 
 const blockSchema = new Schema(
   {
@@ -49,14 +48,16 @@ const blockSchema = new Schema(
 );
 
 blockSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
+  const Layouts = model("Layouts")
   try {
     const layout = await Layouts.findById(this.layout)
     if(layout){
       layout.blocks = layout.blocks.filter(layoutId => layoutId.toString() != this._id.toString())
-      await layout.save().exec()
-      const [sections, tables] = await Promise.all([Sections.find({block:this._id}), Tables.find({block:this._id})])
+      await layout.save()
+      const [sections] = await Promise.all([Sections.find({block:this._id})])
       console.log("Deleting sections and tables from block");
-      await Promise.all([...sections, ...tables].map((doc) => doc.deleteOne().exec()))
+      await Promise.all([...sections].map((doc) => doc.deleteOne().exec()))
+      await Tables.deleteMany({block:this._id})
     }
     else{
       console.error("layout Not Found")

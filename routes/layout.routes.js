@@ -39,7 +39,7 @@ router.post("/:venueId/create", async (req, res) => {
 
       if (layoutExist) {
         console.error(
-          `\nError: A Layout With The Name \"${layoutName}\" Already Exists!`
+          `\nError: A Layout With The Name "${layoutName}" Already Exists!`
         );
         return res
           .status(400)
@@ -128,12 +128,16 @@ router.delete("/:layoutId/delete", async (req, res) => {
   const {layoutId} = req.params
   try {
     const layout = await Layouts.findById(layoutId)
+    if(!layout){
+      console.error("\nError: Layout Not Found!")
+      return res.status(404).json({success: false, message: "Layout Not Found!"})
+    }
     await layout.deleteOne()
     console.log("Success!");
     return res.status(200).json({success:true, message: "Layout Deleted Successfully!"})
   } catch (error) {
     console.error(
-      "\nCaught Error Backend in Layout Edit. Error Message: ",
+      "\nCaught Error Backend in Layout Delete. Error Message: ",
       error.message
     );
     res.status(400).json({ success: false, message: "Internal Server Error!" });

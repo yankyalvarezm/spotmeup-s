@@ -1,8 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Blocks = require("./Blocks.model");
-const Shapes = require("./Shapes.model");
-const Venues = require("./Venues.model");
-
 const layoutSchema = new Schema(
   {
     name: String,
@@ -28,11 +24,14 @@ const layoutSchema = new Schema(
 
 layoutSchema.pre('deleteOne', {document:true, query:false},async function(next) {
   // 'this' is the layout being removed. Pass it to the next middleware.
+  const Blocks = model("Blocks")
+  const Shapes = model("Shapes")
+  const Venues = model("Venues")
   try {
     const venue = await Venues.findById(this.venue)
     if(venue){
       venue.layouts = venue.layouts.filter(layoutId=> layoutId.toString() != this._id.toString())
-      await venue.save().exec()
+      await venue.save()
       const [blocks, shapes] = await Promise.all([Blocks.find({layout:this._id}), Shapes.find({layout:this._id})])
       console.log("Deleting blocks and shapes from layout");
       await Promise.all([...blocks, ...shapes].map(doc => doc.deleteOne().exec()))
