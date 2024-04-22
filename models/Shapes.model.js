@@ -36,6 +36,7 @@ const shapeSchema = new Schema(
 
 shapeSchema.pre('deleteOne', {document: true, query: false}, async function(next){
   const Layouts = model("Layouts")
+
   try {
     const layout = await Layouts.findById(this.layout)
     if(layout){

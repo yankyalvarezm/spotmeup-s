@@ -14,13 +14,13 @@ router.post("/create", async (req, res) => {
       success: false,
       message: "Name Must Be Filled!",
     });
-  } else if (!description) {
+  } /* else if (!description) {
     console.error(`\nError: Description Must Not Be Empty!`);
     return res.status(400).json({
       success: false,
       message: `Description Must Not Be Null!`,
     });
-  } else if (!maxCapacity) {
+  }*/ else if (!maxCapacity) {
     console.error(`\nError: Max Capacity Cannot Be ${maxCapacity}!`);
     return res.status(400).json({
       success: false,

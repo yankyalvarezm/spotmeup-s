@@ -212,9 +212,15 @@ router.get("/:layoutId/find", async (req, res) => {
 // Get All Layouts from one venue
 router.get("/:venueId/findAll", async (req, res) => {
   const venueId = req.params.venueId;
+  if(!venueId){
+    console.error("\nError: Please Specify a Venue Id!")
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Venue Id!" });
+  }
   try {
-    const findVenue = await Venues.findById(venueId).populate("layouts");
-    if (!findVenue) {
+    const venue = await Venues.findById(venueId).populate("layouts");
+    if (!venue) {
       console.error("Error: Venue Not Found!");
       return res
         .status(404)
@@ -223,8 +229,8 @@ router.get("/:venueId/findAll", async (req, res) => {
     console.log("Success!");
     return res.status(201).json({
       success: true,
-      message: `Layouts Found: ${findVenue.layouts.length}`,
-      layouts: findVenue.layouts,
+      message: `Layouts Found: ${venue.layouts.length}`,
+      layouts: venue.layouts,
     });
   } catch (error) {
     console.error(

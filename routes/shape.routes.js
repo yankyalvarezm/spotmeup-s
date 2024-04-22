@@ -175,7 +175,7 @@ router.put("/:shapeId/edit", async (req, res) => {
 router.delete("/:shapeId/delete", async (req, res) => {
   const { shapeId } = req.params;
   try {
-    const shape = Shapes.findById(shapeId)
+    const shape = await Shapes.findById(shapeId)
     if(!shape){
       console.error("\nError: Shape Not Found!")
       return res.status(404).json({success:false, message:"Shape Not Found!"})

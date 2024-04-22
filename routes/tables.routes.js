@@ -302,7 +302,10 @@ router.put("/s/:tableId/edit", async (req, res) => {
 router.put("/b/:tableId/edit", async (req, res) => {
   const {tableId } = req.params;
   const { number } = req.body;
-
+  if(!tableId){
+    console.error("\nError: Please Specify a Table Id!")
+    return res.status(400).json({success:false, message:"Please Specify a Table Id!"})
+  }
   try {
     const table = await Tables.findById(tableId);
     if (!table) {
@@ -348,6 +351,10 @@ router.put("/b/:tableId/edit", async (req, res) => {
 
 router.delete("/:tableId/delete", async (req, res) => {
   const {tableId} = req.params
+  if(!tableId){
+    console.error("\nError: Please Specify a Table Id!")
+    return res.status(400).json({success:false, message:"Please Specify a Table Id!"})
+  }
   try {
     const table = await Tables.findById(tableId);
     if(!table){
@@ -366,7 +373,10 @@ router.delete("/:tableId/delete", async (req, res) => {
 // Get One
 router.get("/:tableId/find", async (req, res) => {
   const tableId = req.params.tableId;
-
+  if(!tableId){
+    console.error("\nError: Please Specify a Table Id!")
+    return res.status(400).json({success:false, message:"Please Specify a Table Id!"})
+  }
     try {
         const findTable = await Tables.findById(tableId)
 
@@ -387,20 +397,24 @@ router.get("/:tableId/find", async (req, res) => {
 // Get All tables from one Block
 router.get("/b/:blockId/findAll", async (req, res) => {
     const {blockId} = req.params;
-  
+    if(!blockId){
+      console.error("\nError: Please Specify a Block Id!")
+      return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+    }
     try {
-      const {tables} = await Blocks.findById(blockId).populate("tables");
-      if (!tables.length) {
+      const block = await Blocks.findById(blockId).populate("tables");
+      console.log("Block", block);
+      if (!block) {
         return res
           .status(404)
           .json({ success: false, message: "Tables not found." });
       }
   
-      console.log("Success!", tables);
+      console.log("Success!", block);
   
       return res
         .status(201)
-        .json({ success: true, tables });
+        .json({ success: true, tables: block.tables });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }
@@ -408,7 +422,10 @@ router.get("/b/:blockId/findAll", async (req, res) => {
 
 router.get("/s/:sectionId/findAll", async (req, res) => {
     const {sectionId} = req.params;
-  
+    if(!sectionId){
+      console.error("\nError: Please Specify a Block Id!")
+      return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+    }
     try {
       const {tables} = await Sections.findById(sectionId).populate("tables");
 

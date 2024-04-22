@@ -134,10 +134,10 @@ router.get("/:blockId/find", async (req, res) => {
     const block = await Blocks.findById(blockId)
     .populate("tables")
     .populate({
-      path: sections,
+      path: "sections",
       populate: [
-        {path: seats},
-        {path: tables}
+        {path: "seats"},
+        {path: "tables"}
       ]
     })
     if(!block){
@@ -150,6 +150,7 @@ router.get("/:blockId/find", async (req, res) => {
     console.error(
       `\nCaught Error Backend in Block Find. Error Message: ${error.message}`
     );
+    console.log(error);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error!" });
@@ -164,15 +165,15 @@ router.get("/:layoutId/findAll", async (req, res) => {
     return res.status(400).json({success:false, message:"Please Specify a Layout Id!"})
   }
   try {
-    const {blocks} = await Layouts.findById(layoutId).populate("blocks");
-    if (!blocks.length) {
+    const layout = await Layouts.findById(layoutId).populate("blocks");
+    if (!layout) {
       return res
         .status(404)
         .json({ success: false, message: "Blocks not found." });
     }
     return res
       .status(201)
-      .json({ success: true, blocks });
+      .json({ success: true, blocks: layout.blocks });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
