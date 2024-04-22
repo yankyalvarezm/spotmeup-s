@@ -32,9 +32,10 @@ layoutSchema.pre('deleteOne', {document:true, query:false},async function(next) 
     if(venue){
       venue.layouts = venue.layouts.filter(layoutId=> layoutId.toString() != this._id.toString())
       await venue.save()
-      const [blocks, shapes] = await Promise.all([Blocks.find({layout:this._id}), Shapes.find({layout:this._id})])
+      const [blocks] = await Promise.all([Blocks.find({layout:this._id})])
       console.log("Deleting blocks and shapes from layout");
-      await Promise.all([...blocks, ...shapes].map(doc => doc.deleteOne().exec()))
+      await Promise.all([...blocks].map(doc => doc.deleteOne().exec()))
+      await Shapes.deleteMany({layout:this._id})
     }
     else{
       console.error("venue Not Found!")

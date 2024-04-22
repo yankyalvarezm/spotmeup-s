@@ -53,25 +53,27 @@ tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) 
       let start = block.tables.indexOf(this._id)
       block.tables = block.tables.filter(id => id.toString() != this._id.toString())
       await block.save()
-      for(let i=start;i<block.tables.length;i++){
-        const table = await Tables.findById(block.tables[i])
+      const tablePromises = block.tables.slice(start).map(async (tableId, i) => {
+        const table = await Tables.findById(tableId)
         if(table){
-          table.number=i
-          await table.save()
+          table.number = start+1 + i;
+          return table.save();
         }
-      }
+      });
+      await Promise.all(tablePromises);
     }
     else if(section){
       let start = section.tables.indexOf(this._id)
       section.tables = section.tables.filter(id => id.toString() != this._id.toString())
       await section.save()
-      for(let i=start ;i<section.tables.length;i++){
-        const table = await Tables.findById(section.tables[i])
+      const tablePromises = section.tables.slice(start).map(async (tableId, i) => {
+        const table = await Tables.findById(tableId)
         if(table){
-          table.number=i
-          await table.save()
+          table.number = start+1 + i;
+          return table.save();
         }
-      }
+      });
+      await Promise.all(tablePromises);
     }
     else{
       console.log(this.block, this.section);
@@ -79,7 +81,6 @@ tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) 
     }
     next()
   } catch (error) {
-    console.error(error)
     throw error
   }
 })

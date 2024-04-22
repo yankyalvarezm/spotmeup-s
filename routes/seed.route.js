@@ -76,6 +76,8 @@ router.post("/", async (req, res) => {
       y: Math.floor(Math.random() * 10),
       width: Math.floor(Math.random() * 10),
       height: Math.floor(Math.random() * 10),
+      maxRow:5,
+      maxCol:5,
       status: "Available",
       type: "Seed Type",
       capacity: Math.floor(Math.random() * 100),

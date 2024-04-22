@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Layouts = require("./Layouts.model");
 
 const venueSchema = new Schema(
   {
@@ -26,6 +25,7 @@ const venueSchema = new Schema(
 );
 
 venueSchema.pre("deleteOne", {document:true, query:false}, async function (next) {
+  const Layouts = model("Layouts")
   try {
     const layouts = await Layouts.find({venue:this._id})
     console.log("Deleting layout from venue");

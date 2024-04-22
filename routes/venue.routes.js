@@ -2,12 +2,7 @@ var express = require("express");
 var router = express.Router();
 
 const Venues = require("../models/Venues.model");
-const Layouts = require("../models/Layouts.model");
-const Blocks = require("../models/Blocks.model");
-const Sections = require("../models/Sections.model");
-const Tables = require("../models/Tables.model");
-const Seats = require("../models/Seats.model");
-const { default: mongoose } = require("mongoose");
+const { mongoose } = require("mongoose");
 
 // Create Venue
 router.post("/create", async (req, res) => {
@@ -127,9 +122,15 @@ router.post("/create", async (req, res) => {
 });
 
 // Edit Venue
+
 router.put("/:venueId/edit", async (req, res) => {
   const venueId = req.params.venueId;
-
+  if(!venueId){
+    console.error("\nError: Please Specify a Venue Id!")
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Venue Id!" });
+  }
   try {
     const updatedVenue = await Venues.findById(venueId);
 
@@ -189,105 +190,17 @@ router.put("/:venueId/edit", async (req, res) => {
 });
 
 // Delete Venue
-// router.delete("/:venueId/delete", async (req, res) => {
-//   const venueId = req.params.venueId;
-
-//   try {
-//     const deleteVenue = await Venues.findById(venueId);
-
-//     if (!deleteVenue) {
-//       console.error("\nError: Unable To Delete Venue.");
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Failed To Delete Venue." });
-//     }
-//     if (deleteVenue.layouts.length) {
-//       const layouts = await Layouts.find({ _id: { $in: deleteVenue.layouts } });
-//       if (!layouts || !layouts.length) {
-//         console.error("\nError: Unable To Delete Layouts In Venue.");
-//         return res
-//           .status(400)
-//           .json({ success: false, message: "Failed To Delete Venue." });
-//       }
-//       // console.log(layouts);
-//       for (let layout of layouts) {
-//         if (layout.blocks.length) {
-//           const blocks = await Blocks.find({ _id: { $in: layout.blocks } });
-//           if (!blocks || !blocks.length) {
-//             console.error(
-//               "\nError: Unable To Delete Blocks from Layout In Venue."
-//             );
-//             return res
-//               .status(400)
-//               .json({ success: false, message: "Failed To Delete Venue." });
-//           }
-//           for (let block of blocks) {
-//             if (block.sections.length) {
-//               const sections = await Sections.find({
-//                 _id: { $in: block.sections },
-//               });
-//               if (!sections || !sections.length) {
-//                 console.error(
-//                   "\nError: Unable To Delete Sections from Block from Layout In Venue."
-//                 );
-//                 return res
-//                   .status(400)
-//                   .json({ success: false, message: "Failed To Delete Venue." });
-//               }
-//               for (let section of sections) {
-//                 if (section.seats.length) {
-//                   await Seats.deleteMany({ _id: { $in: section.seats } }).then(
-//                     () => console.log("Deleting Seats From Sections")
-//                   );
-//                 }
-//                 if (section.tables.length) {
-//                   await Tables.deleteMany({
-//                     _id: { $in: section.tables },
-//                   }).then(() => console.log("Deleting Tables From Blocks"));
-//                 }
-//               }
-//               await Sections.deleteMany({ _id: { $in: block.sections } }).then(
-//                 () => console.log("Deleting Sections From Blocks")
-//               );
-//             }
-//             if (block.tables.length) {
-//               await Tables.deleteMany({ _id: { $in: block.tables } }).then(() =>
-//                 console.log("Deleting Tables From Blocks")
-//               );
-//             }
-//           }
-//           await Blocks.deleteMany({ _id: { $in: layout.blocks } }).then(() =>
-//             console.log("Deleting Blocks From Layouts")
-//           );
-//         }
-//       }
-//       await Layouts.deleteMany({ _id: { $in: deleteVenue.layouts } }).then(() =>
-//         console.log("Deleting Layouts From Venues")
-//       );
-//     }
-//     await Venues.findByIdAndDelete(venueId);
-//     console.log("Success!");
-//     return res.status(201).json({
-//       success: true,
-//       venue: deleteVenue,
-//       message: "Venue Deleted Successfully!",
-//     });
-//   } catch (error) {
-//     console.error(
-//       "\nCaught Error Backend in Venue Delete. Error Message: ",
-//       error.message
-//     );
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Internal Server Error!" });
-//   }
-// });
 
 router.delete("/:venueId/delete", async (req, res) => {
   const { venueId } = req.params;
+  if(!venueId){
+    console.error("\nError: Please Specify a Venue Id!")
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Venue Id!" });
+  }
   try {
     const venue = await Venues.findById(venueId);
-    // console.log(venue);
     if (!venue) {
       console.error("\nError: Venue Not Found!");
       return res
@@ -308,32 +221,15 @@ router.delete("/:venueId/delete", async (req, res) => {
 });
 
 // Get One
-// router.get("/:venueId/find", async (req, res) => {
-//   const venueId = req.params.venueId;
-
-//   try {
-//     const findVenue = await Venues.findById(venueId);
-
-//     if (!findVenue) {
-//       console.error("\nError: Venue Not Found.");
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Venue Not Found." });
-//     }
-//     console.log("Success!");
-//     return res.status(201).json({ success: true, venue: findVenue });
-//   } catch (error) {
-//     console.error(
-//       "\nCaught Error Backend In Venue Find. Error Message: ",
-//       error.message
-//     );
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// });
 
 router.get("/:venueId/find", async (req,res) =>{
   const {venueId} = req.params
-  console.log(venueId);
+  if(!venueId){
+    console.error("\nError: Please Specify a Venue Id!")
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Venue Id!" });
+  }
   try {
     const venue = await Venues.findById(venueId)
     .populate({
@@ -368,7 +264,7 @@ router.get("/:venueId/find", async (req,res) =>{
       return res.status(404).json({success:false, message: "Venue Not Found!"})
     }
 
-    console.log("Success!", venue)
+    console.log("Success!")
     return res.status(200).json({success: true, venue})
 
   } catch (error) {
@@ -385,7 +281,7 @@ router.get("/findAll", async (req, res) => {
   try {
     const findAllVenues = await Venues.find();
 
-    if (!findAllVenues) {
+    if (!findAllVenues.length) {
       console.error("Error: No Venues Were Found!");
       return res
         .status(404)

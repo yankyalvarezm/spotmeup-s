@@ -39,4 +39,33 @@ seatSchema.pre('deleteOne', {document:true, query:false}, async function(next){
   }
 })
 
+// seatSchema.pre('deleteOne', {document:true, query:false}, async function(next){
+//   const Sections = model("Sections")
+//   const Seats = model("Seats")
+//   try {
+//     const section = await Sections.findById(this.section)
+//     if(section){
+//       let start = section.seats.indexOf(this._id)
+//       section.seats = section.seats.filter(seatId => seatId.toString() != this._id.toString())
+//       await section.save()
+//       const seatsPromises = section.seats.slice(start).map(async (seatId, i) => {
+//         const seat = await Seats.findById(seatId)
+//         if(seat){
+//           seat.number = start+1 + i;
+//           return seat.save();
+//         }
+//       });
+//       await Promise.all(seatsPromises);
+//     }
+//     else{
+//       console.error("section Not Found!")
+//     }
+//     next()
+//   } catch (error) {
+//     console.error("Cascade Delete Error On Seats Model");
+//     throw error;
+
+//   }
+// })
+
 module.exports = model("Seats", seatSchema);
