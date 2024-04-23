@@ -1,6 +1,4 @@
-const { Schema, model, mongoose } = require("mongoose");
-const Blocks = require("./Blocks.model");
-
+const { Schema, model } = require("mongoose");
 
 const tableSchema = new Schema(
   {
@@ -14,6 +12,8 @@ const tableSchema = new Schema(
     x: {type: Number, default:0},
     y: {type: Number, default:0},
     z: {type: Number, default:0},
+    row: {type: Number, default:0},
+    col: {type: Number, default:0},
     width: {type: Number, default: 100},
     height: {type: Number, default: 100},
     border: {type:String, trim:true},
@@ -33,9 +33,9 @@ const tableSchema = new Schema(
     backgroundColor: {type: String, default: "black", trim:true},
     justifyContent: {type: String, default:"", trim:true},
     alignItems: {type: String, default:"", trim:true},
-
-    block:{type:Schema.Types.ObjectId, ref: "Blocks"},
-    section:{type:Schema.Types.ObjectId, ref: "Sections"}
+    layout:{ type: Schema.Types.ObjectId, ref: "Layouts" },
+    block: { type: Schema.Types.ObjectId, ref: "Blocks"},
+    section:{ type: Schema.Types.ObjectId, ref: "Sections" }
   },
   {
     timestamps: true,
@@ -43,18 +43,41 @@ const tableSchema = new Schema(
 );
 
 tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
-  const Tables = mongoose.model("Tables")
+  const Blocks = model("Blocks")
+  const Sections = model("Sections")
+  const Tables = model("Tables")
   try {
     const block = await Blocks.findById(this.block)
-    let start = block.tables.indexOf(this._id)
-    block.tables = block.tables.filter(id => id.toString() != this._id.toString())
-    await block.save()
-    for(let i=start ;i<block.tables.length;i++){
-      const table = await Tables.findById(block.tables[i])
-      if(table){
-        table.number=i
-        await table.save()
-      }
+    const section = await Sections.findById(this.section)
+    if(block){
+      let start = block.tables.indexOf(this._id)
+      block.tables = block.tables.filter(id => id.toString() != this._id.toString())
+      await block.save()
+      const tablePromises = block.tables.slice(start).map(async (tableId, i) => {
+        const table = await Tables.findById(tableId)
+        if(table){
+          table.number = start+1 + i;
+          return table.save();
+        }
+      });
+      await Promise.all(tablePromises);
+    }
+    else if(section){
+      let start = section.tables.indexOf(this._id)
+      section.tables = section.tables.filter(id => id.toString() != this._id.toString())
+      await section.save()
+      const tablePromises = section.tables.slice(start).map(async (tableId, i) => {
+        const table = await Tables.findById(tableId)
+        if(table){
+          table.number = start+1 + i;
+          return table.save();
+        }
+      });
+      await Promise.all(tablePromises);
+    }
+    else{
+      console.log(this.block, this.section);
+      console.error("block and/or section Not Found!")
     }
     next()
   } catch (error) {

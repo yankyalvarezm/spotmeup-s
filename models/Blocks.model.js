@@ -1,4 +1,6 @@
 const { Schema, model } = require("mongoose");
+const Sections = require("./Sections.model");
+const Tables = require("./Tables.model");
 
 const blockSchema = new Schema(
   {
@@ -45,8 +47,32 @@ const blockSchema = new Schema(
   }
 );
 
+blockSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
+  const Layouts = model("Layouts")
+  try {
+    const layout = await Layouts.findById(this.layout)
+    if(layout){
+      layout.blocks = layout.blocks.filter(layoutId => layoutId.toString() != this._id.toString())
+      await layout.save()
+      const [sections] = await Promise.all([Sections.find({block:this._id})])
+      console.log("Deleting sections and tables from block");
+      await Promise.all([...sections].map((doc) => doc.deleteOne().exec()))
+      await Tables.deleteMany({block:this._id})
+    }
+    else{
+      console.error("layout Not Found")
+    }
+    next();
+  } catch (error) {
+    console.error("Cascade Delete Error On Blocks Model");
+    throw error;
+  }
+})
+
+
 blockSchema.pre('save', function(next) {
   this.maxTables = this.maxRow * this.maxCol;
   next();
 });
+
 module.exports = model("Blocks", blockSchema);

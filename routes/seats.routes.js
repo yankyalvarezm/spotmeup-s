@@ -40,6 +40,7 @@ router.post("/:sectionId/automatic/create", async (req, res) => {
             status: "Available",
             row: seatRow,
             column: j,
+            section: sectionId
           });
           await newSeat.save();
           createdSeats.push(newSeat);
@@ -60,6 +61,7 @@ router.post("/:sectionId/automatic/create", async (req, res) => {
 });
 
 // Create & Assign - Manual
+
 router.post("/:sectionId/manual/create", async (req, res) => {
   const sectionId = req.params.sectionId;
   const { row, column, ...seatData } = req.body;
@@ -115,6 +117,10 @@ router.post("/:sectionId/manual/create", async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+// router.post("/s/:sectionId/create", async (req, res) =>{
+  
+// })
 
 // Edit
 router.put("/:sectionId/:seatId/edit", async (req, res) => {
