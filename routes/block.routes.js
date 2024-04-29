@@ -31,8 +31,8 @@ router.post("/:layoutId/create", async (req, res) => {
           .json({ success: false, message: "Block Name Taken." });
       }
     }
-
-    const newBlock = new Blocks({ ...req.body, layout: layoutId });
+    const blockName = `B ${layout.blocks.length+1}`;
+    const newBlock = new Blocks({ ...req.body, layout: layoutId, name: blockName});
     await newBlock.save();
 
     const updatedLayout = await Layouts.findByIdAndUpdate(
@@ -165,7 +165,13 @@ router.get("/:layoutId/findAll", async (req, res) => {
     return res.status(400).json({success:false, message:"Please Specify a Layout Id!"})
   }
   try {
-    const layout = await Layouts.findById(layoutId).populate("blocks");
+    const layout = await Layouts.findById(layoutId)
+    .populate({
+        path: 'blocks',
+        populate: [{
+            path: 'tables'
+        }, {path: "sections"}]
+    });
     if (!layout) {
       return res
         .status(404)

@@ -1,6 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Sections = require("./Sections.model");
-const Tables = require("./Tables.model");
 
 const blockSchema = new Schema(
   {
@@ -49,6 +47,8 @@ const blockSchema = new Schema(
 
 blockSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
   const Layouts = model("Layouts")
+  const Sections = model("Sections")
+  const Tables = model("Tables")
   try {
     const layout = await Layouts.findById(this.layout)
     if(layout){

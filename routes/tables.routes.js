@@ -299,6 +299,61 @@ router.put("/s/:tableId/edit", async (req, res) => {
   }
 });
 
+// router.put("/b/:blockId/editMany", async (req, res) => {
+//   const {blockId } = req.params;
+//   // const { number } = req.body;
+
+//   if(!blockId){
+//     console.error("\nError: Please Specify a Block Id!")
+//     return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+//   }
+//   try {
+//     const tables = await Tables.find({block: blockId});
+//     if (!tables.length) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Tables not found" });
+//     }
+
+//     // const block = await Blocks.findById(table.block).populate("tables");
+
+//     // if (!block) {
+//     //   return res
+//     //     .status(404)
+//     //     .json({ success: false, message: "Block not found" });
+//     // }
+
+
+//     // if (number !== table.number) {
+//     //   const tableExist = block.tables.some((table) => table.number === number);
+//     //   // console.log("Line 128 - Table Exist:", tableExist);
+
+//     //   if (tableExist) {
+//     //     return res.status(404).json({
+//     //       success: false,
+//     //       message: "Table number taken.",
+//     //     });
+//     //   }
+//     // }
+//   const tablesPromises = []
+//    for(let i = 0 ; i < req.body.tables.length; i++){
+//     const table = {...tables.find(table => table._id === req.body.tables[i]._id), ...req.body.tables[i]}
+//      tablesPromises.push
+//    }
+//     for (let key in req.body) {
+//       if (key in table) { 
+//           table[key] = req.body[key];
+//       }
+//     }
+//     await table.save();
+
+//     return res.status(200).json({ success: true, table });
+//   } catch (error) {
+//     console.error("\nCaught Error In Table Edit. Error:", error.message);
+//     return res.status(500).json({ success: false, message:  "Internal Server Error" });
+//   }
+// });
+
 router.put("/b/:tableId/edit", async (req, res) => {
   const {tableId } = req.params;
   const { number } = req.body;
@@ -338,7 +393,7 @@ router.put("/b/:tableId/edit", async (req, res) => {
           table[key] = req.body[key];
       }
     }
-    table.save();
+    await table.save();
 
     return res.status(200).json({ success: true, table });
   } catch (error) {
