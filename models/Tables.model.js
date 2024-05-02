@@ -8,6 +8,8 @@ const tableSchema = new Schema(
     tickets: Number,
     ticketsIncluded: { type: Number, default: 2 },
     isIncluded: { type: Boolean, default: true },
+    minimumConsumptionAvailable: { type: Boolean, default: false },
+    minimumConsumption: { type: String, default: 0 },
     number: Number,
     maxCapacity: { type: Number, default: 2 },
     name: { type: String, default: "" },
