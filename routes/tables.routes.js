@@ -394,8 +394,8 @@ router.put("/b/:tableId/edit", async (req, res) => {
       }
     }
     await table.save();
-
-    return res.status(200).json({ success: true, table });
+    const isMatched = await table.getisMatched();
+    return res.status(200).json({ success: true, table: {...table, isMatched} });
   } catch (error) {
     console.error("\nCaught Error In Table Edit. Error:", error.message);
     return res.status(500).json({ success: false, message:  "Internal Server Error" });

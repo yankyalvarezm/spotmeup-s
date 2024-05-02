@@ -7,7 +7,7 @@ const Layouts = require("../models/Layouts.model");
 // Create & Assign
 router.post("/:layoutId/create", async (req, res) => {
   const layoutId = req.params.layoutId;
-  const blockName = req.body.name;
+  // const blockName = req.body.name;
   if(!layoutId){
     console.error("\nError: Please Specify a Layout Id!")
     return res.status(400).json({success:false, message:"Please Specify a Layout Id!"})
@@ -21,16 +21,16 @@ router.post("/:layoutId/create", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Layout Not Found!" });
     }
-    if (blockName) {
-      const blockExist = layout.blocks.some(
-        (block) => block.name === blockName
-      );
-      if (blockExist) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Block Name Taken." });
-      }
-    }
+    // if (blockName) {
+    //   const blockExist = layout.blocks.some(
+    //     (block) => block.name === blockName
+    //   );
+    //   if (blockExist) {
+    //     return res
+    //       .status(400)
+    //       .json({ success: false, message: "Block Name Taken." });
+    //   }
+    // }
     const blockName = `B ${layout.blocks.length+1}`;
     const newBlock = new Blocks({ ...req.body, layout: layoutId, name: blockName});
     await newBlock.save();
@@ -62,6 +62,7 @@ router.post("/:layoutId/create", async (req, res) => {
 // Edit
 router.put("/:blockId/edit", async (req, res) => {
   const blockId = req.params.blockId;
+ const blockName = req.body.name;
   if(!blockId){
     console.error("\nError: Please Specify a Block Id!")
     return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
@@ -72,6 +73,17 @@ router.put("/:blockId/edit", async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Block not found." });
+    }
+    const blocksOnLayout = await Blocks.find({layout:updatedBlock.layout})
+    if (blockName) {
+      const blockExist = blocksOnLayout.some(
+        (block) => block.name === blockName && block._id !== blockId
+      );
+      if (blockExist) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Block Name Taken." });
+      }
     }
     for (let key in req.body) {
       if (key in updatedBlock) {

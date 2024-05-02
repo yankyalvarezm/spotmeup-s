@@ -42,6 +42,16 @@ const tableSchema = new Schema(
   }
 );
 
+tableSchema.method('getisMatched', async function() {
+  try {
+    const Blocks = model("Blocks");
+    const block = await Blocks.findById(this.block);
+    return block.isMatched;
+  } catch (error) {
+    console.error("Error in isMatched method on Table Model", error.message);
+  }
+});
+
 tableSchema.pre('deleteOne', {document:true, query:false}, async function(next) {
   const Blocks = model("Blocks")
   const Sections = model("Sections")

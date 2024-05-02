@@ -72,6 +72,9 @@ blockSchema.pre('deleteOne', {document:true, query:false}, async function(next) 
 
 blockSchema.pre('save', function(next) {
   this.maxTables = this.maxRow * this.maxCol;
+  if(!this.blocks.length){
+    this.isMatched = true;
+  }
   next();
 });
 
