@@ -4,10 +4,12 @@ const tableSchema = new Schema(
   {
     tableType: String,
     status: String,
-    cprice: Number,
+    tprice: Number,
     tickets: Number,
-    isIncluded: Boolean,
+    ticketsIncluded: { type: Number, default: 2 },
+    isIncluded: { type: Boolean, default: true },
     number: Number,
+    maxCapacity: { type: Number, default: 2 },
     name: { type: String, default: "" },
     x: { type: Number, default: 0 },
     y: { type: Number, default: 0 },
@@ -59,6 +61,10 @@ tableSchema.pre(
         block.tables = block.tables.filter(
           (id) => id.toString() != this._id.toString()
         );
+        console.log("block.tables.length:", block.tables.length);
+        if (!block.tables.length) {
+          block.isMatched = true;
+        }
         await block.save();
         const tablePromises = block.tables
           .slice(start)

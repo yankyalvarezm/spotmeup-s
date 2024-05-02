@@ -8,9 +8,11 @@ const Layouts = require("../models/Layouts.model");
 router.post("/:layoutId/create", async (req, res) => {
   const layoutId = req.params.layoutId;
   // const blockName = req.body.name;
-  if(!layoutId){
-    console.error("\nError: Please Specify a Layout Id!")
-    return res.status(400).json({success:false, message:"Please Specify a Layout Id!"})
+  if (!layoutId) {
+    console.error("\nError: Please Specify a Layout Id!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Layout Id!" });
   }
   try {
     // const layout = await Layouts.findById(layoutId).populate("blocks");
@@ -31,8 +33,12 @@ router.post("/:layoutId/create", async (req, res) => {
     //       .json({ success: false, message: "Block Name Taken." });
     //   }
     // }
-    const blockName = `B ${layout.blocks.length+1}`;
-    const newBlock = new Blocks({ ...req.body, layout: layoutId, name: blockName});
+    const blockName = `B ${layout.blocks.length + 1}`;
+    const newBlock = new Blocks({
+      ...req.body,
+      layout: layoutId,
+      name: blockName,
+    });
     await newBlock.save();
 
     const updatedLayout = await Layouts.findByIdAndUpdate(
@@ -62,9 +68,15 @@ router.post("/:layoutId/create", async (req, res) => {
 // Edit
 router.put("/:blockId/edit", async (req, res) => {
   const blockId = req.params.blockId;
-  if(!blockId){
-    console.error("\nError: Please Specify a Block Id!")
-    return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+
+  console.log("body", req.body);
+
+  
+  if (!blockId) {
+    console.error("\nError: Please Specify a Block Id!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Block Id!" });
   }
   try {
     const updatedBlock = await Blocks.findById(blockId);
@@ -95,9 +107,11 @@ router.put("/:blockId/edit", async (req, res) => {
 
 router.delete("/:blockId/delete", async (req, res) => {
   const { blockId } = req.params;
-  if(!blockId){
-    console.error("\nError: Please Specify a Block Id!")
-    return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+  if (!blockId) {
+    console.error("\nError: Please Specify a Block Id!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Block Id!" });
   }
   try {
     const block = await Blocks.findById(blockId);
@@ -125,27 +139,28 @@ router.delete("/:blockId/delete", async (req, res) => {
 // Get One
 
 router.get("/:blockId/find", async (req, res) => {
-  const {blockId} = req.params
-  if(!blockId){
-    console.error("\nError: Please Specify a Block Id!")
-    return res.status(400).json({success:false, message:"Please Specify a Block Id!"})
+  const { blockId } = req.params;
+  if (!blockId) {
+    console.error("\nError: Please Specify a Block Id!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Block Id!" });
   }
   try {
     const block = await Blocks.findById(blockId)
-    .populate("tables")
-    .populate({
-      path: "sections",
-      populate: [
-        {path: "seats"},
-        {path: "tables"}
-      ]
-    })
-    if(!block){
-      console.error("\nError: Block Not Found!")
-      return res.status(404).json({success:true, messsage:"Block Not Found!"})
+      .populate("tables")
+      .populate({
+        path: "sections",
+        populate: [{ path: "seats" }, { path: "tables" }],
+      });
+    if (!block) {
+      console.error("\nError: Block Not Found!");
+      return res
+        .status(404)
+        .json({ success: true, messsage: "Block Not Found!" });
     }
-    console.log("Success!")
-    return res.status(200).json({success:true, message:"OK", block})
+    console.log("Success!");
+    return res.status(200).json({ success: true, message: "OK", block });
   } catch (error) {
     console.error(
       `\nCaught Error Backend in Block Find. Error Message: ${error.message}`
@@ -160,26 +175,28 @@ router.get("/:blockId/find", async (req, res) => {
 // Get All Blocks from one layout
 router.get("/:layoutId/findAll", async (req, res) => {
   const layoutId = req.params.layoutId;
-  if(!layoutId){
-    console.error("\nError: Please Specify a Layout Id!")
-    return res.status(400).json({success:false, message:"Please Specify a Layout Id!"})
+  if (!layoutId) {
+    console.error("\nError: Please Specify a Layout Id!");
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Specify a Layout Id!" });
   }
   try {
-    const layout = await Layouts.findById(layoutId)
-    .populate({
-        path: 'blocks',
-        populate: [{
-            path: 'tables'
-        }, {path: "sections"}]
+    const layout = await Layouts.findById(layoutId).populate({
+      path: "blocks",
+      populate: [
+        {
+          path: "tables",
+        },
+        { path: "sections" },
+      ],
     });
     if (!layout) {
       return res
         .status(404)
         .json({ success: false, message: "Blocks not found." });
     }
-    return res
-      .status(201)
-      .json({ success: true, blocks: layout.blocks });
+    return res.status(201).json({ success: true, blocks: layout.blocks });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
