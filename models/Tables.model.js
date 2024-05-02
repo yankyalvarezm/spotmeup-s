@@ -8,6 +8,9 @@ const tableSchema = new Schema(
     tickets: Number,
     ticketsIncluded: { type: Number, default: 2 },
     isIncluded: { type: Boolean, default: true },
+    isBlockMatched: Boolean,
+    minimumConsumptionAvailable: { type: Boolean, default: false },
+    minimumConsumption: { type: String, default: 0 },
     number: Number,
     maxCapacity: { type: Number, default: 2 },
     name: { type: String, default: "" },
@@ -102,5 +105,19 @@ tableSchema.pre(
     }
   }
 );
+
+tableSchema.pre('save', async function(next){
+  const Blocks = model("Blocks");
+  try {
+    const block = await Blocks.findById(this.block)
+    if(block){
+      this.isBlockMatched = block.isMatched
+    }
+    next()
+  } catch (error) {
+    // console.error(error)
+    throw error
+  }
+})
 
 module.exports = model("Tables", tableSchema);

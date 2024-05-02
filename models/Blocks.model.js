@@ -76,12 +76,25 @@ blockSchema.pre(
   }
 );
 
-blockSchema.pre("save", function (next) {
+blockSchema.pre("save", async function (next) {
   this.maxTables = this.maxRow * this.maxCol;
   if (!this.tables.length) {
     this.isMatched = true;
   }
-
+  const Tables = model("Tables")
+  try {
+    let tables = await Tables.find({block: this._id })
+    if(tables.length){
+      const tablePromises = []
+      for(let table of tables){
+        table.isBlockMatched = this.isMatched
+        tablePromises.push(table.save())
+      }
+      await Promise.all(tablePromises)
+    }
+  } catch (error) {
+    throw error
+  }
 
   next();
 });
