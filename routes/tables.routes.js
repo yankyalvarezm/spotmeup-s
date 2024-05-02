@@ -158,7 +158,7 @@ router.post("/b/:blockId/create/fill", async (req, res) => {
 
     //* Returning a status 201 along with the newly created tables.
     console.log("Success!")
-    return res.status(201).json({success: true, message:"OK", tables})
+    return res.status(201).json({success: true, message:"OK", tables:tables.map(async table => { return {...table, isMatched: table.getisMatched()}} )})
   } catch (error) {
     console.error("\nCaught Error Table Create Fill. Error:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -244,7 +244,7 @@ router.post("/b/:blockId/create", async (req, res) => {
     await block.save();
     await newTable.save();
     console.log("Success!")
-    return res.status(201).json({success: true, message:"OK", table: newTable})
+    return res.status(201).json({success: true, message:"OK", table: {...newTable, isMatched: await newTable.getisMatched}})
   } catch (error) {
     console.error("\nCaught Error In Table Create. Error:", error.message);
     return res.status(500).json({ success: false, message:  "Internal Server Error" });
@@ -395,7 +395,7 @@ router.put("/b/:tableId/edit", async (req, res) => {
     }
     await table.save();
 
-    return res.status(200).json({ success: true, table });
+    return res.status(200).json({ success: true, table:{...table, isMatched:await table.getisMatched()} });
   } catch (error) {
     console.error("\nCaught Error In Table Edit. Error:", error.message);
     return res.status(500).json({ success: false, message:  "Internal Server Error" });
@@ -441,7 +441,7 @@ router.get("/:tableId/find", async (req, res) => {
         .json({ success: false, message: "Table not found." });
         }
 
-        return res.status(201).json({ success: true, table: findTable });
+        return res.status(201).json({ success: true, table: {...findTable, isMatched: await findTable.getisMatched()} });
 
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
@@ -469,7 +469,7 @@ router.get("/b/:blockId/findAll", async (req, res) => {
   
       return res
         .status(201)
-        .json({ success: true, tables: block.tables });
+        .json({ success: true, tables: block.tables.map(async table => {return {...table, isMatched: await table.getisMatched()}}) });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }
