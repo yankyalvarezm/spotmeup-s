@@ -6,7 +6,7 @@ const tableSchema = new Schema(
     status: String,
     tprice: Number,
     tickets: Number,
-    ticketsIncluded: { type: Number, default: 2 },
+    ticketsIncluded: { type: Number, default: 0 },
     isIncluded: { type: Boolean, default: true },
     isBlockMatched: Boolean,
     minimumConsumptionAvailable: { type: Boolean, default: false },
@@ -75,7 +75,7 @@ tableSchema.pre(
             const table = await Tables.findById(tableId);
             if (table) {
               table.number = start + 1 + i;
-              return table.save();
+              return await table.save();
             }
           });
         await Promise.all(tablePromises);
@@ -91,7 +91,7 @@ tableSchema.pre(
             const table = await Tables.findById(tableId);
             if (table) {
               table.number = start + 1 + i;
-              return table.save();
+              return await table.save();
             }
           });
         await Promise.all(tablePromises);
@@ -106,18 +106,20 @@ tableSchema.pre(
   }
 );
 
-tableSchema.pre('save', async function(next){
+tableSchema.pre("save", async function (next) {
   const Blocks = model("Blocks");
   try {
-    const block = await Blocks.findById(this.block)
-    if(block){
-      this.isBlockMatched = block.isMatched
+    const block = await Blocks.findById(this.block);
+    if (block) {
+      this.isBlockMatched = block.isMatched;
+      await block.updateMaxCapacity();
     }
-    next()
+
+    next();
   } catch (error) {
     // console.error(error)
-    throw error
+    throw error;
   }
-})
+});
 
 module.exports = model("Tables", tableSchema);

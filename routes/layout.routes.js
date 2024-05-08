@@ -9,8 +9,8 @@ const Venues = require("../models/Venues.model");
 router.post("/:venueId/create", async (req, res) => {
   const venueId = req.params.venueId;
   const layoutName = req.body.name;
-  if(!venueId){
-    console.error("\nError: Please Specify a Venue Id!")
+  if (!venueId) {
+    console.error("\nError: Please Specify a Venue Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Venue Id!" });
@@ -49,7 +49,7 @@ router.post("/:venueId/create", async (req, res) => {
       }
     }
 
-    const newLayout = new Layouts({...req.body, venue: venueId});
+    const newLayout = new Layouts({ ...req.body, venue: venueId });
     await newLayout.save();
 
     findVenue.layouts.push(newLayout._id);
@@ -76,8 +76,8 @@ router.post("/:venueId/create", async (req, res) => {
 
 router.put("/:layoutId/edit", async (req, res) => {
   const layoutId = req.params.layoutId;
-  if(!layoutId){
-    console.error("\nError: Please Specify a Layout Id!")
+  if (!layoutId) {
+    console.error("\nError: Please Specify a Layout Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Layout Id!" });
@@ -133,22 +133,26 @@ router.put("/:layoutId/edit", async (req, res) => {
 // Delete & Unassign
 
 router.delete("/:layoutId/delete", async (req, res) => {
-  const {layoutId} = req.params
-  if(!layoutId){
-    console.error("\nError: Please Specify a Layout Id!")
+  const { layoutId } = req.params;
+  if (!layoutId) {
+    console.error("\nError: Please Specify a Layout Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Layout Id!" });
   }
   try {
-    const layout = await Layouts.findById(layoutId)
-    if(!layout){
-      console.error("\nError: Layout Not Found!")
-      return res.status(404).json({success: false, message: "Layout Not Found!"})
+    const layout = await Layouts.findById(layoutId);
+    if (!layout) {
+      console.error("\nError: Layout Not Found!");
+      return res
+        .status(404)
+        .json({ success: false, message: "Layout Not Found!" });
     }
-    await layout.deleteOne()
+    await layout.deleteOne();
     console.log("Success!");
-    return res.status(200).json({success:true, message: "Layout Deleted Successfully!"})
+    return res
+      .status(200)
+      .json({ success: true, message: "Layout Deleted Successfully!" });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Layout Delete. Error Message: ",
@@ -156,14 +160,16 @@ router.delete("/:layoutId/delete", async (req, res) => {
     );
     res.status(400).json({ success: false, message: "Internal Server Error!" });
   }
-})
+});
 
 // Get One
 
 router.get("/:layoutId/find", async (req, res) => {
   const layoutId = req.params.layoutId;
-  if(!layoutId){
-    console.error("\nError: Please Specify a Layout Id!")
+
+  console.log("layoutId", layoutId);
+  if (!layoutId) {
+    console.error("\nError: Please Specify a Layout Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Layout Id!" });
@@ -172,23 +178,23 @@ router.get("/:layoutId/find", async (req, res) => {
     const layout = await Layouts.findById(layoutId)
       .populate("shapes")
       .populate({
-        path: 'blocks',
+        path: "blocks",
         populate: [
           {
-            path: 'tables',
+            path: "tables",
           },
           {
-            path: 'sections',
+            path: "sections",
             populate: [
               {
-                path: 'seats'
+                path: "seats",
               },
               {
-                path: 'tables',
-              }
-            ]
-          }
-        ]
+                path: "tables",
+              },
+            ],
+          },
+        ],
       });
 
     if (!layout) {
@@ -199,21 +205,23 @@ router.get("/:layoutId/find", async (req, res) => {
     }
 
     console.log("Success!");
-    return res.status(200).json({ success: true, layout});
+    return res.status(200).json({ success: true, layout });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Layout Find. Error Message: ",
       error.message
     );
-    return res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
 });
 
 // Get All Layouts from one venue
 router.get("/:venueId/findAll", async (req, res) => {
   const venueId = req.params.venueId;
-  if(!venueId){
-    console.error("\nError: Please Specify a Venue Id!")
+  if (!venueId) {
+    console.error("\nError: Please Specify a Venue Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Venue Id!" });

@@ -14,6 +14,7 @@ const blockSchema = new Schema(
     maxSection: { type: Number, default: 4 },
     btickets: { type: Number, default: 0 },
     maxTables: Number,
+    maxCapacity: { type: Number },
     width: { type: Number, default: 100 },
     height: { type: Number, default: 100 },
     border: { type: String, trim: true },
@@ -81,22 +82,45 @@ blockSchema.pre("save", async function (next) {
   if (!this.tables.length) {
     this.isMatched = true;
   }
-  const Tables = model("Tables")
+  const Tables = model("Tables");
   try {
-    let tables = await Tables.find({block: this._id })
-    if(tables.length){
-      const tablePromises = []
-      for(let table of tables){
-        table.isBlockMatched = this.isMatched
-        tablePromises.push(table.save())
-      }
-      await Promise.all(tablePromises)
+    await Tables.updateMany(
+      { block: this._id },
+      { $set: { isBlockMatched: this.isMatched } }
+    );
+    if (this.tables.length) {
+      const tables = await Tables.find({ block: this._id });
+      this.maxCapacity = tables.reduce(
+        (acc, table) => acc + table.maxCapacity,
+        0
+      );
+    } else {
+      this.maxCapacity = this.btickets;
     }
   } catch (error) {
-    throw error
+    throw error;
   }
 
   next();
 });
+
+blockSchema.methods.updateMaxCapacity = async function () {
+  const Tables = model("Tables");
+  if (this.tables.length) {
+    const tables = await Tables.find({ block: this._id });
+    const reduceSum = tables.reduce(
+      (acc, table) => [
+        acc[0] + table.maxCapacity,
+        acc[1] + table.ticketsIncluded,
+      ],
+      [0, 0]
+    );
+    this.maxCapacity = reduceSum[0];
+    this.btickets = reduceSum[1];
+  } else {
+    this.maxCapacity = this.btickets;
+  }
+  await this.save();
+};
 
 module.exports = model("Blocks", blockSchema);
