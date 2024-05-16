@@ -112,10 +112,22 @@ tableSchema.pre("save", async function (next) {
     const block = await Blocks.findById(this.block);
     if (block) {
       this.isBlockMatched = block.isMatched;
-      await block.updateMaxCapacity();
+    }
+    next();
+  } catch (error) {
+    // console.error(error)
+    throw error;
+  }
+});
+
+tableSchema.post("save", async function () {
+  const Blocks = model("Blocks");
+  try {
+    const block = await Blocks.findById(this.block);
+    if (block) {
+      await block.updateTableBasedAttributes();
     }
 
-    next();
   } catch (error) {
     // console.error(error)
     throw error;

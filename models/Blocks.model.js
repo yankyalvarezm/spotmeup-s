@@ -104,23 +104,34 @@ blockSchema.pre("save", async function (next) {
   next();
 });
 
-blockSchema.methods.updateMaxCapacity = async function () {
-  const Tables = model("Tables");
+blockSchema.methods.updateTableBasedAttributes = async function () {
+  const Blocks = model("Blocks");
   if (this.tables.length) {
-    const tables = await Tables.find({ block: this._id });
-    const reduceSum = tables.reduce(
-      (acc, table) => [
-        acc[0] + table.maxCapacity,
-        acc[1] + table.ticketsIncluded,
-      ],
-      [0, 0]
+    await this.populate("tables");
+    const [maxCapacity, btickets, bprice] = this.tables.reduce(
+      (acc, table) => {
+        return [
+          acc[0] + table.maxCapacity,
+          acc[1] + table.ticketsIncluded,
+          acc[2] + table.tprice,
+        ];
+      },
+      [0, 0, 0]
     );
-    this.maxCapacity = reduceSum[0];
-    this.btickets = reduceSum[1];
+
+    return await Blocks.findByIdAndUpdate(
+      this._id,
+      { maxCapacity, btickets, bprice },
+      { new: true }
+    );
   } else {
-    this.maxCapacity = this.btickets;
+    const maxCapacity = this.btickets;
+    return await Blocks.findByIdAndUpdate(
+      this._id,
+      { maxCapacity },
+      { new: true }
+    );
   }
-  await this.save();
 };
 
 module.exports = model("Blocks", blockSchema);
