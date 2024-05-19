@@ -9,6 +9,11 @@ const layoutSchema = new Schema(
     borderSize: { type: Number, default: 7 },
     borderRadius: { type: Number, default: 0 },
     displayScale: { type: Number, default: 1 },
+    containerScale: {type: Number, default: 1},
+    offSet: {
+      x: { type: Number, default: 0 },
+      y: { type: Number, default: 0 },
+    },
     x: { type: Number, default: 0 },
     y: { type: Number, default: 0 },
     status: String,

@@ -25,6 +25,8 @@ const shapeSchema = new Schema(
     borderSize: { type: Number, default: 1 },
     color: { type: String, default: "white", trim: true },
     backgroundColor: { type: String, default: "black", trim: true },
+    offSetX: { type: Number, defalut: 0 },
+    offSetY: { type: Number, defalut: 0 },
     x: { type: Number, default: 0 },
     y: { type: Number, default: 0 },
     z: { type: Number, default: 0 },
