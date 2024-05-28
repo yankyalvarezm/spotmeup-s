@@ -27,6 +27,7 @@ const shapeSchema = new Schema(
     backgroundColor: { type: String, default: "black", trim: true },
     offSetX: { type: Number, defalut: 0 },
     offSetY: { type: Number, defalut: 0 },
+    scale: {type: Number, default: 1},
     x: { type: Number, default: 0 },
     y: { type: Number, default: 0 },
     z: { type: Number, default: 0 },
