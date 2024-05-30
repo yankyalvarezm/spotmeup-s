@@ -14,6 +14,7 @@ const blockSchema = new Schema(
     maxSection: { type: Number, default: 4 },
     btickets: { type: Number, default: 0 },
     maxTables: Number,
+    maxCapacity: { type: Number },
     width: { type: Number, default: 100 },
     height: { type: Number, default: 100 },
     border: { type: String, trim: true },
@@ -76,14 +77,61 @@ blockSchema.pre(
   }
 );
 
-blockSchema.pre("save", function (next) {
+blockSchema.pre("save", async function (next) {
   this.maxTables = this.maxRow * this.maxCol;
   if (!this.tables.length) {
     this.isMatched = true;
   }
-
+  const Tables = model("Tables");
+  try {
+    await Tables.updateMany(
+      { block: this._id },
+      { $set: { isBlockMatched: this.isMatched } }
+    );
+    if (this.tables.length) {
+      const tables = await Tables.find({ block: this._id });
+      this.maxCapacity = tables.reduce(
+        (acc, table) => acc + table.maxCapacity,
+        0
+      );
+    } else {
+      this.maxCapacity = this.btickets;
+    }
+  } catch (error) {
+    throw error;
+  }
 
   next();
 });
+
+blockSchema.methods.updateTableBasedAttributes = async function () {
+  const Blocks = model("Blocks");
+  if (this.tables.length) {
+    await this.populate("tables");
+    const [maxCapacity, btickets, bprice] = this.tables.reduce(
+      (acc, table) => {
+        return [
+          acc[0] + table.maxCapacity,
+          acc[1] + table.ticketsIncluded,
+          acc[2] + table.tprice,
+        ];
+      },
+      [0, 0, 0]
+    );
+
+    return await Blocks.findByIdAndUpdate(
+      this._id,
+      { maxCapacity, btickets, bprice },
+      { new: true }
+    );
+  } else {
+    const maxCapacity = this.btickets;
+    return await Blocks.findByIdAndUpdate(
+      this._id,
+      { maxCapacity },
+      { new: true }
+    );
+  }
+};
 
 module.exports = model("Blocks", blockSchema);
