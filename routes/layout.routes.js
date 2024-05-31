@@ -82,6 +82,13 @@ router.put("/:layoutId/edit", async (req, res) => {
       .status(400)
       .json({ success: false, message: "Please Specify a Layout Id!" });
   }
+
+  if ("blocks" in req.body) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Attempted to modify blocks" });
+  }
+
   try {
     const updatedLayout = await Layouts.findById(layoutId);
 
