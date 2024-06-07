@@ -506,7 +506,7 @@ router.get("/:tableId/find", async (req, res) => {
         .json({ success: false, message: "Table not found." });
     }
 
-    return res.status(201).json({ success: true, table: findTable });
+    return res.status(200).json({ success: true, table: findTable });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -533,7 +533,7 @@ router.get("/b/:blockId/findAll", async (req, res) => {
     // console.log("Success!", block);
     console.log("Success");
 
-    return res.status(201).json({ success: true, tables: block.tables });
+    return res.status(200).json({ success: true, tables: block.tables });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -558,7 +558,7 @@ router.get("/s/:sectionId/findAll", async (req, res) => {
 
     console.log("Success!", tables);
 
-    return res.status(201).json({ success: true, tables });
+    return res.status(200).json({ success: true, tables });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

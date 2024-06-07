@@ -76,6 +76,7 @@ router.post("/:venueId/create", async (req, res) => {
 
 router.put("/:layoutId/edit", async (req, res) => {
   const layoutId = req.params.layoutId;
+  let isChanged = false;
   if (!layoutId) {
     console.error("\nError: Please Specify a Layout Id!");
     return res
@@ -84,8 +85,9 @@ router.put("/:layoutId/edit", async (req, res) => {
   }
 
   if ("blocks" in req.body) {
+    console.log("Attempted to modify blocks");
     return res
-      .status(400)
+      .status(403)
       .json({ success: false, message: "Attempted to modify blocks" });
   }
 
@@ -101,10 +103,12 @@ router.put("/:layoutId/edit", async (req, res) => {
     let invalidKey = null;
     for (let key in req.body) {
       if (key in updatedLayout) {
-        if (req.body[key] == updatedLayout[key] || !req.body[key]) {
+        if (key === "shapes" || key === "createdAt" || key === "updatedAt" || req.body[key] == updatedLayout[key] || !req.body[key]) {
           continue;
         } else {
+          isChanged = true
           updatedLayout[key] = req.body[key];
+          console.log(key, "Changed to: ", updatedLayout[key]);
         }
       } else {
         invalidKey = key;
@@ -118,12 +122,16 @@ router.put("/:layoutId/edit", async (req, res) => {
         message: `Layout Details Failed To Be Updated!`,
       });
     }
-
-    await updatedLayout.save();
+    if(isChanged){
+      await updatedLayout.save();
+    }
+    else{
+      console.log("Nothing Was Changed");
+    }
 
     console.log("Success!");
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Successfully Updated!",
       layout: updatedLayout,
@@ -242,7 +250,7 @@ router.get("/:venueId/findAll", async (req, res) => {
         .json({ success: false, message: "Venue not found." });
     }
     console.log("Success!");
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: `Layouts Found: ${venue.layouts.length}`,
       layouts: venue.layouts,

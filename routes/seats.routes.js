@@ -112,7 +112,7 @@ router.post("/:sectionId/manual/create", async (req, res) => {
     section.seats.push(newSeat);
     await section.save();
 
-    return res.status(201).json({ success: true, section: section.seats });
+    return res.status(200).json({ success: true, section: section.seats });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -168,7 +168,7 @@ router.put("/:sectionId/:seatId/edit", async (req, res) => {
         .json({ success: false, message: "Seat not updated." });
     }
 
-    return res.status(201).json({ success: true, seat: updatedSeat });
+    return res.status(200).json({ success: true, seat: updatedSeat });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -206,7 +206,7 @@ router.delete("/:sectionId/:seatId/delete", async (req, res) => {
 
     await Seats.findByIdAndDelete(seatId);
 
-    return res.status(201).json({ success: true, message: "Seat removed." });
+    return res.status(200).json({ success: true, message: "Seat removed." });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -225,7 +225,7 @@ router.get("/:seatId/find", async (req, res) => {
         .json({ success: false, message: "Seat not found." });
     }
 
-    return res.status(201).json({ success: true, block: findSeat });
+    return res.status(200).json({ success: true, block: findSeat });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -248,7 +248,7 @@ router.get("/:sectionId/findAll", async (req, res) => {
     console.log("Found Seats:", findSectionSeats.seats);
 
     return res
-      .status(201)
+      .status(200)
       .json({ success: true, seats: findSectionSeats.seats });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });

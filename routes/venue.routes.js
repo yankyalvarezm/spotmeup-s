@@ -162,7 +162,7 @@ router.put("/:venueId/edit", async (req, res) => {
     }
     await updatedVenue.save();
     console.log("Success!");
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Successfully Updated!",
       venue: updatedVenue,
@@ -288,7 +288,7 @@ router.get("/findAll", async (req, res) => {
         .json({ success: false, message: "No Venues Were Found." });
     }
     console.log("Success!");
-    return res.status(201).json({ success: true, venues: findAllVenues });
+    return res.status(200).json({ success: true, venues: findAllVenues });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Venue Find All. Error Message: ",

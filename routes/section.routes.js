@@ -85,7 +85,7 @@ router.put("/:sectionId/edit", async (req, res) => {
     //     .json({ success: false, message: "Section not found." });
     // }
 
-    return res.status(201).json({ success: true, section });
+    return res.status(200).json({ success: true, section });
   } catch (error) {
     console.error(
       `\nCaught Error Backend in Section Edit. Error Message: ${error.message}`
@@ -132,7 +132,7 @@ router.delete("/:sectionId/delete", async (req, res) => {
 
     await section.deleteOne();
     console.log("Success!")
-    return res.status(201).json({ success: true, message: "Section removed." });
+    return res.status(200).json({ success: true, message: "Section removed." });
   } catch (error) {
     console.error(
       `\nCaught Error Backend in Section Delete. Error Message: ${error.message}`
@@ -200,7 +200,7 @@ router.get("/:sectionId/find", async (req, res) => {
                       .status(404)
                       .json({ success: false, message: "Sections not found." });
           }
-          return res.status(201).json({ success: true, message: "Ok", sections })
+          return res.status(200).json({ success: true, message: "Ok", sections })
       } catch (error) {
         console.error(
           `\nCaught Error Backend in Section Find All. Error Message: ${error.message}`

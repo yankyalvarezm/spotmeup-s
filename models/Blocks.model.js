@@ -84,10 +84,6 @@ blockSchema.pre("save", async function (next) {
   }
   const Tables = model("Tables");
   try {
-    await Tables.updateMany(
-      { block: this._id },
-      { $set: { isBlockMatched: this.isMatched } }
-    );
     if (this.tables.length) {
       const tables = await Tables.find({ block: this._id });
       this.maxCapacity = tables.reduce(
@@ -104,9 +100,31 @@ blockSchema.pre("save", async function (next) {
   next();
 });
 
+blockSchema.post("save", async function () {
+  try {
+    const Tables = model("Tables");
+    await Tables.updateMany(
+      { block: this._id },
+      { $set: { isBlockMatched: this.isMatched } }
+    );
+  } catch (error) {
+    throw error;
+  }
+});
+
 blockSchema.methods.updateTableBasedAttributes = async function () {
   const Blocks = model("Blocks");
-  if (this.tables.length) {
+  console.log("Tables?", this.tables.length);
+  console.log("Is it matched?", this.isMatched);
+  console.log(
+    "this.tables.length && !this.isMatched",
+    this.tables.length && !this.isMatched
+  );
+  console.log(
+    "this.tables.length && this.isMatched",
+    this.tables.length && this.isMatched
+  );
+  if (this.tables.length && !this.isMatched) {
     await this.populate("tables");
     const [maxCapacity, btickets, bprice] = this.tables.reduce(
       (acc, table) => {
@@ -123,6 +141,12 @@ blockSchema.methods.updateTableBasedAttributes = async function () {
       this._id,
       { maxCapacity, btickets, bprice },
       { new: true }
+    );
+  } else if (this.tables.length && this.isMatched) {
+    const Tables = model("Tables");
+    return await Tables.updateMany(
+      { block: this._id },
+      { $set: { tprice: Math.ceil(this.bprice / this.tables.length) } }
     );
   } else {
     const maxCapacity = this.btickets;

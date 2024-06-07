@@ -68,10 +68,9 @@ router.post("/:layoutId/create", async (req, res) => {
 // Edit
 router.put("/:blockId/edit", async (req, res) => {
   const blockId = req.params.blockId;
+  let isChanged = false;
+  // console.log("body", req.body);
 
-  console.log("body", req.body);
-
-  
   if (!blockId) {
     console.error("\nError: Please Specify a Block Id!");
     return res
@@ -86,13 +85,21 @@ router.put("/:blockId/edit", async (req, res) => {
         .json({ success: false, message: "Block not found." });
     }
     for (let key in req.body) {
-      if (key in updatedBlock) {
+      if (key === "BlockType" || key === "tables"  || key === "sections" || key === "createdAt" || key === "updatedAt" || req.body[key] == updatedBlock[key]) {
+        continue;
+      } else {
+        isChanged = true;
         updatedBlock[key] = req.body[key];
+        console.log(key, "Changed to: ", updatedBlock[key]);
       }
     }
-    await updatedBlock.save();
-
-    return res.status(201).json({ success: true, block: updatedBlock });
+    if(isChanged){
+      await updatedBlock.save();
+    }
+    else{
+      console.log("Nothing Was Changed");
+    }
+    return res.status(200).json({ success: true, block: updatedBlock });
   } catch (error) {
     console.error(
       `\nCaught Error Backend in Block EDIT. Error Message: ${error.message}`
@@ -196,7 +203,7 @@ router.get("/:layoutId/findAll", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Blocks not found." });
     }
-    return res.status(201).json({ success: true, blocks: layout.blocks });
+    return res.status(200).json({ success: true, blocks: layout.blocks });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
