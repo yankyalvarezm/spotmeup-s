@@ -13,6 +13,7 @@ const blockSchema = new Schema(
     isMatched: { type: Boolean, default: false },
     maxSection: { type: Number, default: 4 },
     btickets: { type: Number, default: 0 },
+    totalTicketsIncluded: Number,
     maxTables: Number,
     maxCapacity: { type: Number },
     width: { type: Number, default: 100 },
@@ -114,40 +115,57 @@ blockSchema.post("save", async function () {
 
 blockSchema.methods.updateTableBasedAttributes = async function () {
   const Blocks = model("Blocks");
-  console.log("Tables?", this.tables.length);
-  console.log("Is it matched?", this.isMatched);
-  console.log(
-    "this.tables.length && !this.isMatched",
-    this.tables.length && !this.isMatched
-  );
-  console.log(
-    "this.tables.length && this.isMatched",
-    this.tables.length && this.isMatched
-  );
+  // console.log("Tables?", this.tables.length);
+  // console.log("Is it matched?", this.isMatched);
+  // console.log(
+  //   "this.tables.length && !this.isMatched",
+  //   this.tables.length && !this.isMatched
+  // );
+  // console.log(
+  //   "this.tables.length && this.isMatched",
+  //   this.tables.length && this.isMatched
+  // );
   if (this.tables.length && !this.isMatched) {
     await this.populate("tables");
-    const [maxCapacity, btickets, bprice] = this.tables.reduce(
-      (acc, table) => {
-        return [
-          acc[0] + table.maxCapacity,
-          acc[1] + table.ticketsIncluded,
-          acc[2] + table.tprice,
-        ];
-      },
-      [0, 0, 0]
-    );
+    const [maxCapacity, totalTicketsIncluded, bprice, btickets] =
+      this.tables.reduce(
+        (acc, table) => {
+          return [
+            acc[0] + table.maxCapacity,
+            acc[1] + table.ticketsIncluded,
+            acc[2] + table.tprice,
+            acc[3] + table.tickets,
+          ];
+        },
+        [0, 0, 0, 0]
+      );
 
+    // console.log("Checking maxCapacity",totalTicketsIncluded);
     return await Blocks.findByIdAndUpdate(
       this._id,
-      { maxCapacity, btickets, bprice },
+      { maxCapacity, totalTicketsIncluded, bprice, btickets },
       { new: true }
     );
   } else if (this.tables.length && this.isMatched) {
+    await this.populate("tables");
     const Tables = model("Tables");
-    return await Tables.updateMany(
+    const [maxCapacity ,totalTicketsIncluded, btickets] = this.tables.reduce(
+      (acc, table) => {
+        return [acc[0] + table.maxCapacity, acc[1] + table.ticketsIncluded, acc[2] + table.tickets];
+      },
+      [0, 0, 0]
+    );
+    // console.log("Checking totalTicketsIncluded",totalTicketsIncluded);
+    await Blocks.findByIdAndUpdate(
+      this._id,
+      { maxCapacity, totalTicketsIncluded, btickets },
+      { new: true }
+    );
+    await Tables.updateMany(
       { block: this._id },
       { $set: { tprice: Math.ceil(this.bprice / this.tables.length) } }
     );
+    return;
   } else {
     const maxCapacity = this.btickets;
     return await Blocks.findByIdAndUpdate(

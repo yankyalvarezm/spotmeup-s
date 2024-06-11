@@ -119,6 +119,7 @@ tableSchema.pre(
 tableSchema.pre("save", async function (next) {
   const Blocks = model("Blocks");
   try {
+    this.tickets = this.maxCapacity - this.ticketsIncluded;
     const block = await Blocks.findById(this.block);
     if (block) {
       this.isBlockMatched = block.isMatched;
