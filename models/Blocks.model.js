@@ -8,6 +8,7 @@ const blockSchema = new Schema(
     blockTableType: String, // If Block Type is "Circle" then this should be "addTableCircle" if "Square" then this should be "addTableSquare"
     capacity: Number,
     bprice: { type: Number, default: 0 },
+    totalBprice: Number,
     maxRow: { type: Number, default: 0 }, //Table Prop
     maxCol: { type: Number, default: 0 }, //Table Prop
     isMatched: { type: Boolean, default: false },
@@ -93,6 +94,7 @@ blockSchema.pre("save", async function (next) {
       );
     } else {
       this.maxCapacity = this.btickets;
+      this.totalBprice = this.bprice * this.btickets
     }
   } catch (error) {
     throw error;
@@ -128,27 +130,29 @@ blockSchema.methods.updateTableBasedAttributes = async function () {
   if (this.tables.length && !this.isMatched) {
     await this.populate("tables");
     const [maxCapacity, totalTicketsIncluded, bprice, btickets] =
-      this.tables.reduce(
-        (acc, table) => {
-          return [
-            acc[0] + table.maxCapacity,
-            acc[1] + table.ticketsIncluded,
-            acc[2] + table.tprice,
-            acc[3] + table.tickets,
+    this.tables.reduce(
+      (acc, table) => {
+        return [
+          acc[0] + table.maxCapacity,
+          acc[1] + table.ticketsIncluded,
+          acc[2] + table.tprice,
+          acc[3] + table.tickets,
           ];
-        },
-        [0, 0, 0, 0]
-      );
-
+          },
+          [0, 0, 0, 0]
+          );
+          
+    const totalBprice = bprice;
     // console.log("Checking maxCapacity",totalTicketsIncluded);
     return await Blocks.findByIdAndUpdate(
       this._id,
-      { maxCapacity, totalTicketsIncluded, bprice, btickets },
+      { maxCapacity, totalTicketsIncluded, totalBprice, bprice, btickets },
       { new: true }
     );
   } else if (this.tables.length && this.isMatched) {
     await this.populate("tables");
     const Tables = model("Tables");
+    const totalBprice = this.bprice;
     const [maxCapacity ,totalTicketsIncluded, btickets] = this.tables.reduce(
       (acc, table) => {
         return [acc[0] + table.maxCapacity, acc[1] + table.ticketsIncluded, acc[2] + table.tickets];
@@ -158,7 +162,7 @@ blockSchema.methods.updateTableBasedAttributes = async function () {
     // console.log("Checking totalTicketsIncluded",totalTicketsIncluded);
     await Blocks.findByIdAndUpdate(
       this._id,
-      { maxCapacity, totalTicketsIncluded, btickets },
+      { maxCapacity, totalTicketsIncluded, totalBprice, btickets },
       { new: true }
     );
     await Tables.updateMany(
@@ -168,9 +172,10 @@ blockSchema.methods.updateTableBasedAttributes = async function () {
     return;
   } else {
     const maxCapacity = this.btickets;
+    const totalBprice = this.btickets * this.bprice
     return await Blocks.findByIdAndUpdate(
       this._id,
-      { maxCapacity },
+      { maxCapacity, totalBprice },
       { new: true }
     );
   }
