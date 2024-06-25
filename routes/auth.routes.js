@@ -104,7 +104,7 @@ router.post("/signup", async (req, res) => {
     // Create and sign the token
     const authToken = jwt.sign(payload, process.env.SECRET, {
       algorithm: "HS256",
-      expiresIn: "6h",
+      expiresIn: "24h",
     });
     await newUser.save();
     // Send the token and new user as the response
@@ -187,7 +187,7 @@ router.post("/login", async (req, res) => {
     // Create and sign the token
     const authToken = jwt.sign(payload, process.env.SECRET, {
       algorithm: "HS256",
-      expiresIn: "6h",
+      expiresIn: "24h",
     });
     console.log("Success!");
     return res.status(200).json({ success: true, authToken, user: payload });

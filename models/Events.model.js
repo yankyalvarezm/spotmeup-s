@@ -6,6 +6,7 @@ const eventSchema = new Schema(
     images: String,
     eventType: String,
     status: {type: String, default: "Available"},
+    hasVenue:Boolean,
     // capacity: {type: Number, default: 5},
     description: {type: String, default: " "},
     date: {type: String},

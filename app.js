@@ -17,6 +17,7 @@ var tablesRouter = require("./routes/tables.routes");
 var authRouter = require("./routes/auth.routes");
 var shapeRouter = require("./routes/shape.routes")
 var eventRouter = require("./routes/event.routes")
+var ticketRouter = require("./routes/ticket.routes")
 var seed = require("./routes/seed.route");
 
 var app = express();
@@ -50,6 +51,7 @@ app.use("/tables", tablesRouter);
 app.use("/auth", authRouter);
 app.use("/shape", shapeRouter);
 app.use("/event", eventRouter);
+app.use("/ticket", ticketRouter);
 app.use("/seed", seed);
 
 mongoose

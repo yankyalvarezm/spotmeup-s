@@ -59,7 +59,7 @@ router.put("/edit", isAuthenticated, async (req, res) => {
 
     const authToken = jwt.sign(payload, process.env.SECRET, {
       algorithm: "HS256",
-      expiresIn: "6h",
+      expiresIn: "24h",
     });
 
     await foundUser.save();
@@ -175,7 +175,7 @@ router.post(
 
       const authToken = jwt.sign(payload, process.env.SECRET, {
         algorithm: "HS256",
-        expiresIn: "6h",
+        expiresIn: "24h",
       });
 
       await foundUser.save();

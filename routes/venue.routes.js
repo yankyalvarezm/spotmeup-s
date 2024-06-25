@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-
+const isAuthenticated = require("../middleware/isAuthenticated.js");
 const Venues = require("../models/Venues.model");
 const { mongoose } = require("mongoose");
 
@@ -125,8 +125,8 @@ router.post("/create", async (req, res) => {
 
 router.put("/:venueId/edit", async (req, res) => {
   const venueId = req.params.venueId;
-  if(!venueId){
-    console.error("\nError: Please Specify a Venue Id!")
+  if (!venueId) {
+    console.error("\nError: Please Specify a Venue Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Venue Id!" });
@@ -193,8 +193,8 @@ router.put("/:venueId/edit", async (req, res) => {
 
 router.delete("/:venueId/delete", async (req, res) => {
   const { venueId } = req.params;
-  if(!venueId){
-    console.error("\nError: Please Specify a Venue Id!")
+  if (!venueId) {
+    console.error("\nError: Please Specify a Venue Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Venue Id!" });
@@ -222,64 +222,66 @@ router.delete("/:venueId/delete", async (req, res) => {
 
 // Get One
 
-router.get("/:venueId/find", async (req,res) =>{
-  const {venueId} = req.params
-  if(!venueId){
-    console.error("\nError: Please Specify a Venue Id!")
+router.get("/:venueId/find", async (req, res) => {
+  const { venueId } = req.params;
+  if (!venueId) {
+    console.error("\nError: Please Specify a Venue Id!");
     return res
       .status(400)
       .json({ success: false, message: "Please Specify a Venue Id!" });
   }
   try {
-    const venue = await Venues.findById(venueId)
-    .populate({
-      path:'layouts',
-      populate:[
+    const venue = await Venues.findById(venueId).populate({
+      path: "layouts",
+      populate: [
         {
-          path:"shapes"
+          path: "shapes",
         },
         {
-          path:'blocks',
-          populate:[
+          path: "blocks",
+          populate: [
             {
-              path: 'tables'
+              path: "tables",
             },
             {
-              path:'sections',
-              populate:[
+              path: "sections",
+              populate: [
                 {
-                  path:'seats'
+                  path: "seats",
                 },
                 {
-                  path:'tables'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    })
-    if(!venue){
-      console.error("\nError: Venue Not Found!")
-      return res.status(404).json({success:false, message: "Venue Not Found!"})
+                  path: "tables",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    if (!venue) {
+      console.error("\nError: Venue Not Found!");
+      return res
+        .status(404)
+        .json({ success: false, message: "Venue Not Found!" });
     }
 
-    console.log("Success!")
-    return res.status(200).json({success: true, venue})
-
+    console.log("Success!");
+    return res.status(200).json({ success: true, venue });
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Layout Find. Error Message: ",
       error.message
     );
-    return res.status(500).json({ success: false, message: "Internal Server Error!" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
   }
-})
+});
 
 // Get All
 router.get("/findAll", async (req, res) => {
   try {
-    const findAllVenues = await Venues.find();
+    const findAllVenues = await Venues.find().populate("layouts");
 
     if (!findAllVenues.length) {
       console.error("Error: No Venues Were Found!");
@@ -292,6 +294,28 @@ router.get("/findAll", async (req, res) => {
   } catch (error) {
     console.error(
       "\nCaught Error Backend in Venue Find All. Error Message: ",
+      error.message
+    );
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
+  }
+});
+router.get("/user/findAll", isAuthenticated, async (req, res) => {
+  try {
+    const findAllUserVenues = await Venues.find({ owner: req.user._id });
+
+    if (!findAllUserVenues.length) {
+      console.log("No Venues Were Found!");
+      return res
+        .status(200)
+        .json({ success: true, message: "No Venues Were Found." });
+    }
+    console.log("Success!");
+    return res.status(200).json({ success: true, venues: findAllUserVenues });
+  } catch (error) {
+    console.error(
+      "\nCaught Error Backend in Venue Find All User Venues. Error Message: ",
       error.message
     );
     return res
