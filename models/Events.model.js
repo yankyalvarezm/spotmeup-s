@@ -12,8 +12,10 @@ const eventSchema = new Schema(
     date: {type: String},
     time: {type: String, default: "12:00:00"},
     address: String,
-    tickets: {type: Number, default: 5},
+    ticketAmount: {type: Number, default: 5},
     venue: { type: Schema.Types.ObjectId, ref: "Venues" },
+    layout: {type: Schema.Types.ObjectId, ref: "Layouts"},
+    tickets: [{type: Schema.Types.ObjectId, ref:"Tickets"}],
     host: { type: Schema.Types.ObjectId, ref: "Users" },
   },
   {
