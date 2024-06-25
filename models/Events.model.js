@@ -11,7 +11,7 @@ const eventSchema = new Schema(
     description: {type: String, default: " "},
     date: {type: String},
     time: {type: String, default: "12:00:00"},
-    address: String,
+    address: Object,
     ticketAmount: {type: Number, default: 5},
     venue: { type: Schema.Types.ObjectId, ref: "Venues" },
     layout: {type: Schema.Types.ObjectId, ref: "Layouts"},
