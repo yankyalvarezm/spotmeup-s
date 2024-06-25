@@ -4,12 +4,12 @@ const isAuthenticated = require("../middleware/isAuthenticated");
 const Events = require("../models/Events.model");
 
 const isValidDateFormat = (dateString) => {
-  const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+  const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   return regex.test(dateString);
 };
 
 const isValidTimeFormat = (timeString) => {
-  const regex = /^(0[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/i;
+  const regex = /^([01]\d|2[0-3]):?([0-5]\d)$/;
   return regex.test(timeString);
 };
 
@@ -38,6 +38,7 @@ router.post("/create", isAuthenticated, async (req, res) => {
       });
     }
     if (!isValidDateFormat(req.body.date)) {
+      console.log(`Date ${req.body.date} is not a valid Date`)
       console.error("A date is required to create an event!");
       return res.status(400).json({
         success: false,
@@ -45,11 +46,12 @@ router.post("/create", isAuthenticated, async (req, res) => {
       });
     }
     if ("time" in req.body) {
-      if (!isValidDateFormat(req.body.time)) {
-        console.error("Time is its in incorrect format!");
+      if (!isValidTimeFormat(req.body.time)) {
+        console.log(`Time ${req.body.time} is not a valid Time`)
+        console.error("Time it's in incorrect format!");
         return res.status(400).json({
           success: false,
-          message: "Time is its in incorrect format!",
+          message: "Time it's in incorrect format!",
         });
       }
     }
