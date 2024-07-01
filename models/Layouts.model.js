@@ -9,7 +9,7 @@ const layoutSchema = new Schema(
     borderSize: { type: Number, default: 7 },
     borderRadius: { type: Number, default: 0 },
     displayScale: { type: Number, default: 1 },
-    containerScale: {type: Number, default: 1},
+    containerScale: { type: Number, default: 1 },
     offSet: {
       x: { type: Number, default: 0 },
       y: { type: Number, default: 0 },
@@ -19,6 +19,12 @@ const layoutSchema = new Schema(
     status: String,
     layoutType: String,
     capacity: Number,
+
+    totalEarnings: { type: Number, default: 0 },
+    totalTickets: { type: Number, default: 0 },
+    totalTicketsIncluded: { type: Number, default: 0 },
+    totalTables: { type: Number, default: 0 },
+
     venue: { type: Schema.Types.ObjectId, ref: "Venues" },
     blocks: [{ type: Schema.Types.ObjectId, ref: "Blocks" }],
     shapes: [{ type: Schema.Types.ObjectId, ref: "Shapes" }],
@@ -57,5 +63,40 @@ layoutSchema.pre(
     }
   }
 );
+
+layoutSchema.methods.updateReferenceBasedAttributes = async function () {
+  if (this.blocks.length) {
+    try {
+      await this.populate("blocks");
+      const [totalEarnings, ticketAmount, totalTicketsIncluded, totalTables] =
+        this.blocks.reduce(
+          (acc, block) => [
+            acc[0] + block.totalBprice,
+            acc[1] + block.btickets,
+            acc[2] + block.totalTicketsIncluded,
+            acc[3] + block.tables.length
+          ],
+          [0, 0, 0, 0]
+        );
+
+      await this.updateOne({
+        totalEarnings,
+        ticketAmount,
+        totalTicketsIncluded,
+        totalTables
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+layoutSchema.post("save", async function (next) {
+  try {
+    await this.updateReferenceBasedAttributes();
+  } catch (error) {
+    throw error;
+  }
+});
 
 module.exports = model("Layouts", layoutSchema);
