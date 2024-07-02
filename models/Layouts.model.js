@@ -68,7 +68,7 @@ layoutSchema.methods.updateReferenceBasedAttributes = async function () {
   if (this.blocks.length) {
     try {
       await this.populate("blocks");
-      const [totalEarnings, ticketAmount, totalTicketsIncluded, totalTables] =
+      const [totalEarnings, totalTickets, totalTicketsIncluded, totalTables] =
         this.blocks.reduce(
           (acc, block) => [
             acc[0] + block.totalBprice,
