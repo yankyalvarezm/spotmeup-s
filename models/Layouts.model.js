@@ -79,24 +79,24 @@ layoutSchema.methods.updateReferenceBasedAttributes = async function () {
           [0, 0, 0, 0]
         );
 
-        this.totalEarnings = totalEarnings;
-        this.totalTickets = totalTickets;
-        this.totalTicketsIncluded = totalTicketsIncluded;
-        this.totalTables = totalTables;
+        // this.totalEarnings = totalEarnings;
+        // this.totalTickets = totalTickets;
+        // this.totalTicketsIncluded = totalTicketsIncluded;
+        // this.totalTables = totalTables;
 
-      // await this.updateOne({
-      //   totalEarnings,
-      //   totalTickets,
-      //   totalTicketsIncluded,
-      //   totalTables
-      // });
+      await this.updateOne({
+        totalEarnings,
+        totalTickets,
+        totalTicketsIncluded,
+        totalTables
+      });
     } catch (error) {
       throw error;
     }
   }
 };
 
-layoutSchema.pre("save", async function (next) {
+layoutSchema.post("save", async function (next) {
   try {
     await this.updateReferenceBasedAttributes();
   } catch (error) {

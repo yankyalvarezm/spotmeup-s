@@ -105,11 +105,14 @@ blockSchema.pre("save", async function (next) {
 
 blockSchema.post("save", async function () {
   try {
+    const Layouts = model("Layouts")
     const Tables = model("Tables");
     await Tables.updateMany(
       { block: this._id },
       { $set: { isBlockMatched: this.isMatched } }
     );
+    const layout = await Layouts.findById(this.layout)
+    await layout.updateReferenceBasedAttributes()
   } catch (error) {
     throw error;
   }
@@ -117,16 +120,6 @@ blockSchema.post("save", async function () {
 
 blockSchema.methods.updateTableBasedAttributes = async function () {
   const Blocks = model("Blocks");
-  // console.log("Tables?", this.tables.length);
-  // console.log("Is it matched?", this.isMatched);
-  // console.log(
-  //   "this.tables.length && !this.isMatched",
-  //   this.tables.length && !this.isMatched
-  // );
-  // console.log(
-  //   "this.tables.length && this.isMatched",
-  //   this.tables.length && this.isMatched
-  // );
   if (this.tables.length && !this.isMatched) {
     await this.populate("tables");
     const [maxCapacity, totalTicketsIncluded, bprice, btickets] =
