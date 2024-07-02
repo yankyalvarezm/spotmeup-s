@@ -100,6 +100,8 @@ router.put("/:eventId/edit", fileUploader.array("image", 8), async (req, res) =>
       if (
         !key in event ||
         !req.body[key] ||
+        key === "image" ||
+        key === "image" ||
         key === "venue" ||
         key === "host"
       ) {
