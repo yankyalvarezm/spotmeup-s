@@ -6,17 +6,17 @@ const blockSchema = new Schema(
     status: String,
     blockType: String,
     blockTableType: String, // If Block Type is "Circle" then this should be "addTableCircle" if "Square" then this should be "addTableSquare"
-    capacity: Number,
+    capacity: {type:Number, default:0},
     bprice: { type: Number, default: 0 },
-    totalBprice: Number,
+    totalBprice: {type: Number, default: 0},
     maxRow: { type: Number, default: 0 }, //Table Prop
     maxCol: { type: Number, default: 0 }, //Table Prop
     isMatched: { type: Boolean, default: false },
     maxSection: { type: Number, default: 4 },
     btickets: { type: Number, default: 0 },
-    totalTicketsIncluded: Number,
-    maxTables: Number,
-    maxCapacity: { type: Number },
+    totalTicketsIncluded: {type:Number, default: 0},
+    maxTables: {type: Number, default: 0}, //might remove
+    maxCapacity: { type: Number, default:0 },
     width: { type: Number, default: 100 },
     height: { type: Number, default: 100 },
     border: { type: String, trim: true },

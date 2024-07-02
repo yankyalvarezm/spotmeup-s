@@ -18,7 +18,7 @@ const layoutSchema = new Schema(
     y: { type: Number, default: 0 },
     status: String,
     layoutType: String,
-    capacity: Number,
+    capacity: {type:Number, default:0},
 
     totalEarnings: { type: Number, default: 0 },
     totalTickets: { type: Number, default: 0 },
