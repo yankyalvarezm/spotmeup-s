@@ -13,7 +13,7 @@ const isValidTimeFormat = (timeString) => {
   return regex.test(timeString);
 };
 
-router.post("/create", isAuthenticated, async (req, res) => {
+router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (req, res) => {
   try {
     if (!req.user._id) {
       console.error("A userId is required to create an event!");
@@ -63,6 +63,9 @@ router.post("/create", isAuthenticated, async (req, res) => {
       });
     }
     const event = new Events({ ...req.body, host: req.params.userId });
+    if (req.files.length) {
+      event["images"] = [...req.files.map((file) => file.path)]
+    }
     await event.save();
 
     return res.status(201).json({
