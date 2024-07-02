@@ -81,7 +81,7 @@ layoutSchema.methods.updateReferenceBasedAttributes = async function () {
 
       await this.updateOne({
         totalEarnings,
-        ticketAmount,
+        totalTickets,
         totalTicketsIncluded,
         totalTables
       });
