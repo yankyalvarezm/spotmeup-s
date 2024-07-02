@@ -63,8 +63,10 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
       });
     }
     const event = new Events({ ...req.body, host: req.params.userId });
-    if (req.files.length) {
-      event["images"] = [...req.files.map((file) => file.path)]
+    if (req.files) {
+      if(req.files.length){
+        event["images"] = [...req.files.map((file) => file.path)]
+      }
     }
     await event.save();
 
