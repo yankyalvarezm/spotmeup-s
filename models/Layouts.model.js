@@ -65,6 +65,7 @@ layoutSchema.pre(
 );
 
 layoutSchema.methods.updateReferenceBasedAttributes = async function () {
+  const Layouts = model("Layouts");
   if (this.blocks.length) {
     try {
       await this.populate("blocks");
@@ -74,22 +75,26 @@ layoutSchema.methods.updateReferenceBasedAttributes = async function () {
             acc[0] + block.totalBprice,
             acc[1] + block.btickets,
             acc[2] + block.totalTicketsIncluded,
-            acc[3] + block.tables.length
+            acc[3] + block.tables.length,
           ],
           [0, 0, 0, 0]
         );
 
-        // this.totalEarnings = totalEarnings;
-        // this.totalTickets = totalTickets;
-        // this.totalTicketsIncluded = totalTicketsIncluded;
-        // this.totalTables = totalTables;
+      // this.totalEarnings = totalEarnings;
+      // this.totalTickets = totalTickets;
+      // this.totalTicketsIncluded = totalTicketsIncluded;
+      // this.totalTables = totalTables;
 
-      await this.updateOne({
-        totalEarnings,
-        totalTickets,
-        totalTicketsIncluded,
-        totalTables
-      });
+      await Layouts.findByIdAndUpdate(
+        this._id,
+        {
+          totalEarnings,
+          totalTickets,
+          totalTicketsIncluded,
+          totalTables,
+        },
+        { new: true }
+      );
     } catch (error) {
       throw error;
     }
