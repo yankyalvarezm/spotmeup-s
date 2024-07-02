@@ -147,7 +147,7 @@ router.get("/:eventId/find", async (req, res) => {
         .status(400)
         .json({ success: false, message: "EventId Missing!" });
     }
-    const event = await Events.findById(req.params.eventId);
+    const event = await Events.findById(req.params.eventId).populate({path:"venue"},{path:"layout"});
     if (!event) {
       console.error("Event not found!");
       return res

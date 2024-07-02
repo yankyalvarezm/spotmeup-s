@@ -14,7 +14,7 @@ const eventSchema = new Schema(
     saleStartDate: { type: String },
     saleStartTime: { type: String, default: "12:00:00" },
     address: Object,
-
+    purchaseLimit: {type: Number, default: 0},
     // total
 
     venue: { type: Schema.Types.ObjectId, ref: "Venues" },
