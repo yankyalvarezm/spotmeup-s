@@ -31,11 +31,11 @@ eventSchema.methods.updateReferenceBasedAttributes = async function () {
   if (this.hasVenue) {
     try {
       await this.populate(
-        { path: "venue" },
+        [{ path: "venue" },
         {
           path: "layout",
           populate: { path: "blocks" },
-        }
+        }]
       );
       // const Blocks = model("Blocks")
       const [totalEarnings, ticketAmount, totalTicketsIncluded] =
