@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated");
 const Events = require("../models/Events.model");
-
+const fileUploader = require("../configs/cloudinary.config")
 const isValidDateFormat = (dateString) => {
   const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   return regex.test(dateString);
@@ -78,7 +78,7 @@ router.post("/create", isAuthenticated, async (req, res) => {
   }
 });
 
-router.put("/:eventId/edit", async (req, res) => {
+router.put("/:eventId/edit", fileUploader.array("image", 8), async (req, res) => {
   try {
     const event = Events.findById(req.params.eventId);
     if ("date" in req.body || "time" in req.body) {
@@ -107,6 +107,9 @@ router.put("/:eventId/edit", async (req, res) => {
       } else {
         event[key] = req.body[key];
       }
+    }
+    if (req.files.length) {
+      event["images"] = [...event["images"], ...req.files.map((file) => file.path)]
     }
     await event.save();
     return res.status(200).json({
