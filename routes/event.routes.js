@@ -2,7 +2,8 @@ var express = require("express");
 var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated");
 const Events = require("../models/Events.model");
-const fileUploader = require("../configs/cloudinary.config")
+const fileUploader = require("../configs/cloudinary.config");
+const cloudinary = require("cloudinary").v2;
 const isValidDateFormat = (dateString) => {
   const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   return regex.test(dateString);
@@ -13,7 +14,8 @@ const isValidTimeFormat = (timeString) => {
   return regex.test(timeString);
 };
 
-router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (req, res) => {
+router.post("/create", isAuthenticated, async (req, res) => {
+  console.log("Event Body ===>", req.body);
   try {
     if (!req.user._id) {
       console.error("A userId is required to create an event!");
@@ -38,7 +40,7 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
       });
     }
     if (!isValidDateFormat(req.body.date)) {
-      console.log(`Date ${req.body.date} is not a valid Date`)
+      console.log(`Date ${req.body.date} is not a valid Date`);
       console.error("A date is required to create an event!");
       return res.status(400).json({
         success: false,
@@ -47,7 +49,7 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
     }
     if ("time" in req.body) {
       if (!isValidTimeFormat(req.body.time)) {
-        console.log(`Time ${req.body.time} is not a valid Time`)
+        console.log(`Time ${req.body.time} is not a valid Time`);
         console.error("Time it's in incorrect format!");
         return res.status(400).json({
           success: false,
@@ -63,13 +65,8 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
       });
     }
     const event = new Events({ ...req.body, host: req.params.userId });
-    if (req.files) {
-      if(req.files.length){
-        event["images"] = [...req.files.map((file) => file.path)]
-      }
-    }
     await event.save();
-
+    console.log("Event Success ==>>", event);
     return res.status(201).json({
       success: true,
       message: `Event "${req.body.name}" created successfully!`,
@@ -83,7 +80,7 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
   }
 });
 
-router.put("/:eventId/edit", fileUploader.array("image", 8), async (req, res) => {
+router.put("/:eventId/edit", async (req, res) => {
   try {
     const event = Events.findById(req.params.eventId);
     if ("date" in req.body || "time" in req.body) {
@@ -115,15 +112,73 @@ router.put("/:eventId/edit", fileUploader.array("image", 8), async (req, res) =>
         event[key] = req.body[key];
       }
     }
-    if (req.files.length) {
-      event["images"] = [...event["images"], ...req.files.map((file) => file.path)]
-    }
+
     await event.save();
     return res.status(200).json({
       success: true,
       message: `Event ${event.name} was edited successfully!`,
       event,
     });
+  } catch (error) {
+    console.error("Internal Server Error:", error.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
+  }
+});
+
+router.post(
+  "/:eventId/image/upload",
+  fileUploader.array("image", 8),
+  async (req, res) => {
+    try {
+      if (!req.files || !req.files.length) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Failed To Upload Image(s)!" });
+      }
+      const event = await Events.findById(req.params.eventId);
+      if(event.images[0] === ""){
+        event.images = [...req.files.map((file) => file.path)];
+      }else{
+        event.images = [...event.images, ...req.files.map((file) => file.path)];
+      }
+      await event.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "Image(s) Uploaded Successfully!" });
+    } catch (error) {
+      console.error("Internal Server Error:", error.message);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error!" });
+    }
+  }
+);
+
+router.delete("/:eventId/image/delete", async (req, res) => {
+  try {
+    const event = await Events.findById(req.params.eventId);
+    const imageToDelete = event.images
+      .find((imageLink) => imageLink === req.body.imageLink)
+      .split("/")
+      .pop();
+    const deleteImage = await cloudinary.uploader.destroy(imageToDelete);
+    if (deleteImage.result === "ok") {
+      event.images = event.images.filter(
+        (imageLink) => imageLink !== req.body.imageLink
+      );
+      await event.save();
+      return res.json({
+        success: true,
+        message: "Image deleted successfully!",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete image from Cloudinary!",
+      });
+    }
   } catch (error) {
     console.error("Internal Server Error:", error.message);
     return res
@@ -157,7 +212,10 @@ router.get("/:eventId/find", async (req, res) => {
         .status(400)
         .json({ success: false, message: "EventId Missing!" });
     }
-    const event = await Events.findById(req.params.eventId).populate([{path:"venue"}, {path: "layout"}]);
+    const event = await Events.findById(req.params.eventId).populate([
+      { path: "venue" },
+      { path: "layout" },
+    ]);
     if (!event) {
       console.error("Event not found!");
       return res
@@ -214,6 +272,5 @@ router.delete("/:eventId/delete", async (req, res) => {
       .json({ success: false, message: "Internal Server Error!" });
   }
 });
-
 
 module.exports = router;
