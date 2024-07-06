@@ -4,7 +4,7 @@ const Transactions = require("../models/Transaction.model.js");
 var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated.js");
 
-router.post("/create", async (res, req) => {
+router.post("/create", async (req, res) => {
   try {
     const transaction = new Transactions(req.body);
     await transaction.save();
@@ -17,7 +17,7 @@ router.post("/create", async (res, req) => {
   }
 });
 
-router.get("/:transactionId/find", async (res, req) => {
+router.get("/:transactionId/find", async (req, res) => {
   try {
     const transaction = await Transactions.findById(req.params.transactionId);
     if (!transaction) {
@@ -33,7 +33,7 @@ router.get("/:transactionId/find", async (res, req) => {
       .json({ success: false, message: "Internal Server Error!" });
   }
 });
-router.get("/findAll", async (res, req) => {
+router.get("/findAll", async (req, res) => {
   try {
     const transactions = await Transactions.find();
     if (!transactions.length) {
@@ -51,7 +51,7 @@ router.get("/findAll", async (res, req) => {
       .json({ success: false, message: "Internal Server Error!" });
   }
 });
-router.get("/user/findAll", isAuthenticated, async (res, req) => {
+router.get("/user/findAll", isAuthenticated, async (req, res) => {
   try {
     const transactions = await Transactions.find({buyer: req.user});
     if (!transactions.length) {
