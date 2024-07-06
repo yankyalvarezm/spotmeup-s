@@ -7,7 +7,7 @@ const ticketSchema = new Schema({
   eventTime: String,
   price: Number,
   qrCode: String,
-  status: { type: String, default: "Active", enum:["Active","Expired", "Cancelled"] },
+  status: { type: String, default: "active", enum:["active","expired", "canceled"] },
   buyer: { type: Schema.Types.ObjectId, ref: "Users" },
   event: { type: Schema.Types.ObjectId, ref: "Events" },
   layout:{type: Schema.Types.ObjectId, ref: "Layouts"},

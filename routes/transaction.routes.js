@@ -3,6 +3,27 @@ var express = require("express");
 const Transactions = require("../models/Transaction.model.js");
 var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated.js");
+const transporter = require("../configs/nodemailer.config.js");
+
+
+router.post('/send-email', async (req, res) => {
+    const { recipientEmail, subject, text } = req.body;
+  
+    const mailOptions = {
+      from: "no-reply@spotmeup.net",
+      to: recipientEmail,
+      subject,
+      text,
+    };
+  
+    try {
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: 'Email sent successfully!' });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      res.status(500).json({ error: 'Failed to send email' });
+    }
+  });
 
 router.post("/create", async (req, res) => {
   try {
