@@ -10,7 +10,7 @@ router.post("/create", async (req, res) => {
     await transaction.save();
     return res
       .status(201)
-      .json({ success: true, message: "Transaction Created!" });
+      .json({ success: true, message: "Transaction Created!", transaction });
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error!" });
@@ -39,7 +39,11 @@ router.get("/findAll", async (req, res) => {
     if (!transactions.length) {
       return res
         .status(200)
-        .json({ success: true, message: "No Transactions Found!" });
+        .json({
+          success: true,
+          message: "No Transactions Found!",
+          transactions,
+        });
     }
     return res
       .status(200)
@@ -53,11 +57,13 @@ router.get("/findAll", async (req, res) => {
 });
 router.get("/user/findAll", isAuthenticated, async (req, res) => {
   try {
-    const transactions = await Transactions.find({buyer: req.user});
+    const transactions = await Transactions.find({ buyer: req.user });
     if (!transactions.length) {
-      return res
-        .status(200)
-        .json({ success: true, message: "No Transactions Found!" });
+      return res.status(200).json({
+        success: true,
+        message: "No Transactions Found!",
+        transactions,
+      });
     }
     return res
       .status(200)

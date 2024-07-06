@@ -10,14 +10,9 @@ const transactionSchema = new Schema(
     total: { type: Number, default: 0 },
     description: { type: String, default: "" },
     status: { type: String, enum: ["pending", "completed", "canceled"] },
-    items: [
-      {
-        name: { type: String, required: true },
-        quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
-      },
-    ],
+    items: [Object],
     buyer: { type: Schema.Types.ObjectId, ref: "Users" },
+    seller: { type: Schema.Types.ObjectId, ref: "Users" },
   },
   {
     timestamps: true,
