@@ -70,7 +70,7 @@ router.get("/user/findAll", isAuthenticated, async (res, req) => {
   }
 });
 
-
+module.exports = router;
 
 // Delete Missing
 // Edit Missing
