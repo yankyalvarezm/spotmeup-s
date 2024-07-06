@@ -136,7 +136,7 @@ tableSchema.post("save", async function () {
   const Layouts = model("Layouts");
   try {
     const block = await Blocks.findById(this.block);
-    const layout = await Layouts.findById(this.block.layout);
+    const layout = await Layouts.findById(block.layout);
     if (block) {
       await block.updateTableBasedAttributes();
       await layout.updateReferenceBasedAttributes();
