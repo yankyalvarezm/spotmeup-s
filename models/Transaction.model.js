@@ -13,6 +13,7 @@ const transactionSchema = new Schema(
     items: [Object],
     buyer: { type: Schema.Types.ObjectId, ref: "Users" },
     seller: { type: Schema.Types.ObjectId, ref: "Users" },
+    email: { type: String },
   },
   {
     timestamps: true,

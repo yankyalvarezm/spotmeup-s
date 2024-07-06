@@ -14,11 +14,11 @@ const saltRounds = 10;
 //JWT for creating tokens for users
 const jwt = require("jsonwebtoken");
 const { default: mongoose } = require("mongoose");
-const keyPairEncryption = require("../configs/keyPairEncryption.js");
+// const keyPairEncryption = require("../configs/keyPairEncryption.js");
 
-router.get('/public-key', (req, res) => {
-  res.send(keyPairEncryption.getPublicKey());
-});
+// router.get('/public-key', (req, res) => {
+//   res.send(keyPairEncryption.getPublicKey());
+// });
 
 // router.post('/decrypt-data', (req, res) => {
 //   const encryptedData = req.body.encryptedData;

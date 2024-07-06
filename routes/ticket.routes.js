@@ -4,9 +4,11 @@ const Tickets = require("../models/Tickets.model");
 const Events = require("../models/Events.model");
 const Layouts = require("../models/Layouts.model");
 const Blocks = require("../models/Blocks.model");
+const Transactions = require("../models/Transaction.model.js");
 var router = express.Router();
 
 router.post("/create", async (req, res) => {
+  console.log("Tickets Create:", req.body)
   try {
     const event = await Events.findById(req.body.event);
     if (!event) {
@@ -22,16 +24,23 @@ router.post("/create", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid Layout Id!" });
     }
-    const block = await Blocks.findById(req.body.layout);
+    const block = await Blocks.findById(req.body.block);
     if (!block) {
       console.log("Invalid Block Id!");
       return res
         .status(400)
         .json({ success: false, message: "Invalid Block Id!" });
     }
+    const transaction = await Transactions.findById(req.body.transaction);
+    if (!transaction) {
+      console.log("Invalid transaction Id!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid transaction Id!" });
+    }
     const ticket = new Tickets({ ...req.body });
     await ticket.save();
-    await ticket.populate("event", "layout", "block");
+    await ticket.populate("event layout block");
     const mailOptions = {
       from: process.env.EMAIL_AUTH_USER,
       to: req.body.email,
@@ -105,6 +114,31 @@ router.get("/:ticketId/find", async (req, res) => {
   }
 });
 //maybe create a find tickets by eventId and/or by userId
+
+router.get("/:transactionId/transaction/find", async (req, res) => {
+  // console.log("Finding Tickets =====>>");
+  try {
+    const tickets = await Tickets.find({
+      transaction: req.params.transactionId,
+    }).populate("buyer event layout block");
+    // console.log("Tickets:", tickets);
+
+    if (tickets.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No tickets found for this transaction ID!",
+        tickets,
+      });
+    }
+
+    return res.status(200).json({ success: true, message: "OK!", tickets });
+  } catch (error) {
+    console.error("Internal Server Error:", error.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error!" });
+  }
+});
 
 router.get("/user/findAll", isAuthenticated, async (req, res) => {
   try {
