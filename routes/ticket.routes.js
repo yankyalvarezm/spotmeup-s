@@ -41,12 +41,7 @@ router.post("/create", async (req, res) => {
     const ticket = new Tickets({ ...req.body });
     await ticket.save();
     await ticket.populate("event layout block");
-    const mailOptions = {
-      from: process.env.EMAIL_AUTH_USER,
-      to: req.body.email,
-      subject: "Thank You For Your Purchase",
-      text: "Thank You For Your Purchase",
-    };
+    
     return res
       .status(201)
       .json({ success: true, message: "Ticket Created Successfully!", ticket });
@@ -57,6 +52,32 @@ router.post("/create", async (req, res) => {
       .json({ success: false, message: "Internal Server Error!" });
   }
 });
+
+router.post('/:transactionId/send-email', async (req, res) =>{
+  try {
+    const tickets = await Tickets.find({transaction: req.params.transactionId})
+    if(!tickets.length){
+      console.error("Failed to send tickets via email!")
+      return res.status(400).json({success:false, message: "Failed to send tickets via email!"})
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_AUTH_USER,
+      to: tickets[0].email,
+      subject: "Thank You For Your Purchase",
+      text: `Thank You For Your Purchase ${tickets.map(ticket => ticket.qrCode).join(' ')}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ message: 'Email sent successfully!' });
+    
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+})
+
+
 router.put("/:ticketId/edit", async (req, res) => {
   try {
     const ticket = await Tickets.findById(req.params.eventId).populate(
