@@ -5,10 +5,11 @@ const Events = require("../models/Events.model");
 const Layouts = require("../models/Layouts.model");
 const Blocks = require("../models/Blocks.model");
 const Transactions = require("../models/Transaction.model.js");
+const transporter = require("../configs/nodemailer.config.js");
 var router = express.Router();
 
 router.post("/create", async (req, res) => {
-  console.log("Tickets Create:", req.body)
+  console.log("Tickets Create:", req.body);
   try {
     const event = await Events.findById(req.body.event);
     if (!event) {
@@ -41,7 +42,7 @@ router.post("/create", async (req, res) => {
     const ticket = new Tickets({ ...req.body });
     await ticket.save();
     await ticket.populate("event layout block");
-    
+
     return res
       .status(201)
       .json({ success: true, message: "Ticket Created Successfully!", ticket });
@@ -53,30 +54,34 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.post('/:transactionId/send-email', async (req, res) =>{
+router.post("/:transactionId/send-email", async (req, res) => {
   try {
-    const tickets = await Tickets.find({transaction: req.params.transactionId})
-    if(!tickets.length){
-      console.error("Failed to send tickets via email!")
-      return res.status(400).json({success:false, message: "Failed to send tickets via email!"})
+    const tickets = await Tickets.find({
+      transaction: req.params.transactionId,
+    });
+    if (!tickets.length) {
+      console.error("Failed to send tickets via email!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Failed to send tickets via email!" });
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_AUTH_USER,
+      from: process.env.SMTP_AUTH_USER,
       to: tickets[0].email,
       subject: "Thank You For Your Purchase",
-      text: `Thank You For Your Purchase ${tickets.map(ticket => ticket.qrCode).join(' ')}`
+      text: `Thank You For Your Purchase ${tickets
+        .map((ticket) => ticket.qrCode)
+        .join(" ")}`,
     };
 
     await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: 'Email sent successfully!' });
-    
+    return res.status(200).json({ message: "Email sent successfully!" });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "Failed to send email" });
   }
-})
-
+});
 
 router.put("/:ticketId/edit", async (req, res) => {
   try {
