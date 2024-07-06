@@ -32,6 +32,12 @@ router.post("/create", async (req, res) => {
     const ticket = new Tickets({ ...req.body });
     await ticket.save();
     await ticket.populate("event", "layout", "block");
+    const mailOptions = {
+      from: process.env.EMAIL_AUTH_USER,
+      to: req.body.email,
+      subject: "Thank You For Your Purchase",
+      text: "Thank You For Your Purchase",
+    };
     return res
       .status(201)
       .json({ success: true, message: "Ticket Created Successfully!", ticket });
