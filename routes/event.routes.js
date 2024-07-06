@@ -65,6 +65,7 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
     const event = new Events({ ...req.body, host: req.params.userId });
     if (req.files) {
       if(req.files.length){
+
         event["images"] = [...req.files.map((file) => file.path)]
       }
     }
@@ -83,7 +84,7 @@ router.post("/create", isAuthenticated, fileUploader.array("image", 8),async (re
   }
 });
 
-router.put("/:eventId/edit", fileUploader.array("image", 8), async (req, res) => {
+router.put("/:eventId/edit", async (req, res) => {
   try {
     const event = Events.findById(req.params.eventId);
     if ("date" in req.body || "time" in req.body) {

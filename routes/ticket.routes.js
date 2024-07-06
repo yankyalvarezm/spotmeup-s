@@ -1,12 +1,37 @@
 var express = require("express");
-const Tickets = require("../models/Tickets.model");
-var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated.js");
+const Tickets = require("../models/Tickets.model");
+const Events = require("../models/Events.model");
+const Layouts = require("../models/Layouts.model");
+const Blocks = require("../models/Blocks.model");
+var router = express.Router();
 
-router.post("/:eventId/create", async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
-    const ticket = new Tickets({ ...req.body, event: req.param.eventId });
+    const event = await Events.findById(req.body.event);
+    if (!event) {
+      console.log("Invalid Event Id!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Event Id!" });
+    }
+    const layout = await Layouts.findById(req.body.layout);
+    if (!layout) {
+      console.log("Invalid Layout Id!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Layout Id!" });
+    }
+    const block = await Blocks.findById(req.body.layout);
+    if (!block) {
+      console.log("Invalid Block Id!");
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Block Id!" });
+    }
+    const ticket = new Tickets({ ...req.body });
     await ticket.save();
+    await ticket.populate("event", "layout", "block");
     return res
       .status(201)
       .json({ success: true, message: "Ticket Created Successfully!", ticket });
@@ -29,7 +54,13 @@ router.put("/:ticketId/edit", async (req, res) => {
         .json({ success: true, message: "Ticket not found!" });
     }
     for (key in req.body) {
-      if (req.body[key] === ticket[key] || key === "event" || key === "buyer") {
+      if (
+        req.body[key] === ticket[key] ||
+        key === "event" ||
+        key === "buyer" ||
+        key === "layout" ||
+        key === "block"
+      ) {
         continue;
       } else {
         ticket[key] = req.body[key];
@@ -50,7 +81,9 @@ router.get("/:ticketId/find", async (req, res) => {
   try {
     const ticket = await Tickets.findById(req.params.eventId).populate(
       "buyer",
-      "event"
+      "event",
+      "layout",
+      "block"
     );
     if (!ticket) {
       return res
@@ -71,20 +104,20 @@ router.get("/user/findAll", isAuthenticated, async (req, res) => {
   try {
     const tickets = await Tickets.find({ buyer: req.user._id }).populate(
       "buyer",
-      "event"
+      "event",
+      "layout",
+      "block"
     );
     if (!tickets.length) {
       return res
         .status(200)
         .json({ success: true, message: `No ticket found!` });
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: `Found ${tickets.length} tickets`,
-        tickets,
-      });
+    return res.status(200).json({
+      success: true,
+      message: `Found ${tickets.length} tickets`,
+      tickets,
+    });
   } catch (error) {
     console.error("Internal Server Error:", error.message);
     return res
@@ -100,13 +133,11 @@ router.get("/findAll", async (req, res) => {
         .status(200)
         .json({ success: true, message: `No ticket found!` });
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: `Found ${tickets.length} tickets`,
-        tickets,
-      });
+    return res.status(200).json({
+      success: true,
+      message: `Found ${tickets.length} tickets`,
+      tickets,
+    });
   } catch (error) {
     console.error("Internal Server Error:", error.message);
     return res
