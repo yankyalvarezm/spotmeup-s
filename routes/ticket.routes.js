@@ -41,6 +41,8 @@ router.post("/create", async (req, res) => {
     }
     const ticket = new Tickets({ ...req.body });
     await ticket.save();
+    event.tickets.push(ticket._id)
+    await event.save()
     await ticket.populate("event layout block");
 
     return res
@@ -209,8 +211,28 @@ router.get("/findAll", async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error!" });
+    }
+  });
+  router.get('/:qrCode/validate', async (req,res) => {
+    try {
+      const ticket = Tickets.findOne({qrCode:req.params.qrCode})
+      if(!ticket){
+        console.error("This ticket has an invalid qrCode!")
+        return res.status(400).json({success:false, message:"Ticket Invalid"})
+      }else if(ticket.status.toLowerCase() === "canceled" || ticket.status.toLowerCase() === "expired"){
+        console.error("This ticket has been deactivated!")
+        return res.status(400).json({success:false, message:"Ticket Invalid"})
+      } else if(ticket.status === 'active'){
+        console.log("This is a Valid Ticket")
+        return res.status(200).json({success:true, message:"Ticket Accepted"})
+      }
+    } catch (error) {
+      console.error("Error:",error.message)
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error!" });
   }
-});
+})
 router.delete("/:ticketId/delete", async (req, res) => {
   try {
     const ticket = await Tickets.findById(req.params.eventId);
