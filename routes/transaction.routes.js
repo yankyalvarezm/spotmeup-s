@@ -4,19 +4,64 @@ const Transactions = require("../models/Transaction.model.js");
 var router = express.Router();
 const isAuthenticated = require("../middleware/isAuthenticated.js");
 const transporter = require("../configs/nodemailer.config.js");
+const QRCode = require('qrcode');
+const { v4: uuidv4 } = require("uuid");
 
+
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET
+});
+
+// Generate a QR code
+const generateQRCode = async (text) => {
+  try {
+    return await QRCode.toDataURL(text);
+  } catch (err) {
+    console.error('QR Code Generation Error:', err);
+  }
+};
+
+// Upload the QR code to Cloudinary
+const uploadQRCodeToCloudinary = async (dataUrl) => {
+  try {
+    const result = await cloudinary.uploader.upload(dataUrl, {
+      folder: 'SpotMeUp/qr-codes',
+      resource_type: 'image',
+    });
+    return result.secure_url;
+  } catch (err) {
+    console.error('Cloudinary Upload Error:', err);
+  }
+};
 
 router.post('/send-email', async (req, res) => {
-    const { recipientEmail, subject, text } = req.body;
+  try {
+    const { recipientEmail, subject } = req.body;
+    const qrCodeDataUrl = await generateQRCode(uuidv4());
+    const qrCodeImageUrl = await uploadQRCodeToCloudinary(qrCodeDataUrl);
+
+    const html = ` <div>
+      <h1>Hello Test,</h1>
+      <p>Thank you for joining our platform. We're excited to have you on board!</p>
+      <p>Your username is: Test</p>
+      <p>Scan the QR code below to access your personalized link:</p>
+      <img src="${qrCodeImageUrl}" alt="QR Code">
+      <p>Best regards,</p>
+      <p>The Team</p>
+    </div>`
   
     const mailOptions = {
       from: "no-reply@spotmeup.net",
       to: recipientEmail,
       subject,
-      text,
+      html,
     };
   
-    try {
       await transporter.sendMail(mailOptions);
       res.status(200).json({ message: 'Email sent successfully!' });
     } catch (error) {
